@@ -6,7 +6,7 @@ theme = "aafu"
     title = "Aafu theme"
     author = "Darshan Baral"
     description = "Website title"
-    copyright = "aaa"
+    copyright = "DLn"
 
     [params.theme]
         # Available themes are 'lght', 'dark', and 'pinkish'
