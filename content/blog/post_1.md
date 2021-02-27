@@ -1,22 +1,36 @@
 ---
 categories:
-- aliquam auctor
-- do
-date: "2018-05-23"
-description: vulputate sem sapien felis ullamcorper risus mi eu metus integer posuere
-  fermentum
+- Be digital
+- 
+date: "2020-02-29"
+description: Building a simple webbsite
 draft: false
 tags:
-- aliquam incididunt
-- notes
-- velit
-title: vestibulum vitae dictum aliqua phasellus magnis at
+- CV 
+- Online
+- No more paper
+title: Build an online CV/blogg 
 ---
 
-# eu velit magna aliqua hendrerit
+# How to: 
 
-Cursus non odio nam suspendisse mollis tempus tincidunt, cursus praesent facilisi elementum etiam rhoncus tempor. At penatibus ultrices nulla phasellus mi quis luctus felis ultricies. Urna tempus ac consequat sem sed curabitur justo, quam suspendisse cursus aenean integer tellus consectetur. Sed bibendum hendrerit volutpat fames libero nisl dui, nunc vivamus augue posuere luctus scelerisque ultrices. Do pretium consectetur vestibulum lacinia eget do semper, varius viverra scelerisque madssa semper venenatis cras. Ac pharetra interdum rhoncus eleifend libero bolestie ligula justo.
+This app/blogg/CV is hosted by netlifly and developed in code by using the open source package "Hugo" in the  program R (Rstudio). This is a simply project to learn more about programming and the advantages of being digital. The deployment of a Hugo site is fairly straight forward. You need to have: 
+1. Install R-studio. 
+2. Download the Hugo package. 
+3. Download a specific theme (If you don´t want to build your own theme)
+4. Create a Git Hub profile and a repository from where your code is stored. 
+5. Create a netlify account. 
+6. Sync R to GitHub
+7. Sync GitHub to Netlifly
+8. Excecute. 
 
-Malesuada vel arcu odio scelerisque tellus adipiscing congue vitae erat leo commodo. Rhoncus amet cras curabitur non augue aenean eu nibh nisl orci lorem. Augue rhoncus euismod leo nam netus viverra interdum lectus do quam. Consequat dolor metus urna ultricies mi aliquet dolore dictum. Facilisi facilisis et eiusmod mus orci consectetur dolore ultricies placerat porttitor sed. Est labore hendrerit id malesuada interdum quisque mollis mattis ut.
+For more details read this: 
+[link](https://bookdown.org/yihui/blogdown/installation.html)
 
-Aliqua congue egestas bibendum pretium semper id vulputate eleifend lorem vestibulum auctor. Euismod eleifend eiusmod at vel suspendisse donec commodo sit volutpat do. Iaculis accimsan ipsum suscipit labore mattis sollicitudin sit eiusmod turpis. Nisi pulvinar vulputate scelerisque feugiat posuere a dui faucibus. Nam ultrices magnis netus sed faucibus aliqua interdum laoreet consectetur eleifend. Malesuada elit enim ullamcorper commodo eget pretium penatibus vitae vestibulum iaculis.
+and watch this: 
+[link](https://www.youtube.com/watch?v=9Jqvaoeh1W4)
+
+
+
+
+
