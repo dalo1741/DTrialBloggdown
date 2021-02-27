@@ -1,22 +1,17 @@
 ---
 categories:
-- facilisi odio
-- id
-date: "2018-05-18"
-description: posuere ultricies ornare ligula augue do aliquam vitae erat labore ipsum
+- Ideas
+- Thinking different
+date: "2020-02-28"
+description: Ideas on how to use this site 
   nibh
 draft: false
 tags:
-- eu fames
-- notes
-- pharetra
-title: enim ultricies dolore metus ac eiusmod interdum
+- Knowledge library
+- 
+title:Ideas on how to use this site 
 ---
 
-# non tempor mauris elementum semper
+# Keeping things stored at one place.
 
-Interdum dolor sit etiam aenean ac fermentum auctor cursus nulla tellus purus justo. Ullamcorper elit do tincidunt auctor sit leo, pulvinar scelerisque do fringilla nisi porttitor fermentum. Tellus elit mauris lobortis iaculis mus morbi nunc lacus. Velit placerat facilisis varius odio purus sociis elementum morbi. Dignissim congue nulla diam aenean mi commodo quisque egestas amet mattis posuere lobortis. Tristique laoreet mus diam tellus vestibulum scelerisque ipsum, rhoncus mollis sed consequat natoque eget sem.
-
-Potenti non mollis bolestie dui justo feugiat maecenas interdum. Magnis dolore feugiat eget ridiculus lorem laoreet netus faucibus tortor. Laoreet metus euismod labore neque tortor sapien facilisis ornare phasellus. Sed etiam erat iaculis porta suscipit donec varius quam mattis vivamus phasellus. Porta tristique consectetur aenean ultrices dignissim velit orci praesent luctus tempor quam. Leo aenean est pellentesque suscipit amet condimentum, at imperdiet etiam dictum quis volutpat sollicitudin.
-
-Nullam dignissim ac vel sed hendrerit tortor, aliquet nunc gravida eiusmod netus placerat aenean. Varius lacinia egestas augue sem justo suscipit mollis ultricies nulla vestibulum convallis dui. Tincidunt nisl elementum cras quisque scelerisque feugiat turpis, varius felis quam ornare eu scelerisque accimsan. Feugiat quam congue dolor ligula justo convallis a, iaculis faucibus mollis nunc nulla sem nibh. Vulputate nec adipiscing libero lorem imperdiet arcu neque quis iaculis donec bibendum. Suspendisse pharetra enim nulla penatibus madssa congue a, in urna ligula etiam vel duis rhoncus.
+I currently work with finance, controlling, developing within financial reporting. I believe that the work environment today is scattered especially within my field of expertise. We have today an rapidly changing trend towards digitalization. The interpretation of this is that an accountant in the future cannot only be an accountant. Everone needs to be more: The growing digitalization puts higher empahsis on skills related to data and statistics, however one also needs the crucial knowledge of business and accounting. I see it a wide knowledge gap between datascientists and accountants/controllers. I personally strive to be both of these to be the part that fill the gap betweeen these different knowledges this to take better/faster/more efficient decisions. 
