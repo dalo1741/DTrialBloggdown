@@ -88,7 +88,7 @@ theme = "aafu"
     [params.aboutme]
         title = "About Me"
         icon = "fas fa-user"
-        description = "**Highly ambitous and curious** love to make things run smooth and believe that everything that can be automated should be. Also, hugh intrest in *finance*, *digitalization*, *family and friends*."
+        description = "**Highly ambitous and curious**, love to make things run smooth and believe that everything that can be automated should be. Also, hugh intrest in *finance*, *digitalization*, *family and friends*."
         
     # Experience section
     [params.experience]
@@ -100,7 +100,7 @@ theme = "aafu"
             dates = "Aug 2020 - *Present*"
             link = "https://www.klarna.com/"
             company = "Klarna Bank AB"
-            details = "Work with process optimzations related to the financial reporting domain. Moreover, projectleader of Klarna AB's audit process. This position carries many parameters of flexibility in order to direct my knowledge in areas most needed. In short my position mainly focus on problem solving both short-term and more long-term in form of looking over and **adjust/improve** current processes within Klarna Bank."
+            details = "Work with process optimzation related to financial reporting. Moreover, projectleader of Klarna AB's audit process. This position carries many parameters of flexibility in order to direct my knowledge in areas most needed.This position mainly focus on problem solving both short-term and more long-term in form of looking over and **adjust/improve** current processes within Klarna Bank."
         [[params.experience.list]]
             position = "Audit associate Financial services"
             dates = "Aug 2018 - Aug 2020"
