@@ -7,9 +7,9 @@ description: Ideas on how to use this site
 draft: false
 tags:
 - Knowledge library
-- 
-title:Ideas on how to use this site 
+title: Ideas on how to use this site 
 ---
+
 
 # Keeping things stored at one place.
 
