@@ -6,10 +6,10 @@ theme = "aafu"
     title = "Aafu theme"
     author = "Darshan Baral"
     description = "Website title"
-    copyright = "DLn"
+    copyright = "aaa"
 
     [params.theme]
-        # Available themes are 'light', 'dark', and 'pinkish'
+        # Available themes are 'lght', 'dark', and 'pinkish'
         mainTheme = "light"
         # setting false below will hide 'aafu by darshan' displayed under the profile pic
         showAttribute = false
@@ -29,7 +29,7 @@ theme = "aafu"
     # Profile section
     [params.profile]
         name = "David Lowén, DLn."
-		tagline = "Senior Accountant"
+		tagline = "Problem solver"
 		location = "Stockholm, Swe"
         photo = "profile.jpg"
 
@@ -88,7 +88,7 @@ theme = "aafu"
     [params.aboutme]
         title = "About Me"
         icon = "fas fa-user"
-        description = "**Highly ambitous and curious** love to make things run smooth and believe that everything that can be automated should be. Also, hugh inerest in *finance*, *digitalization*, *family and friends*."
+        description = "**Highly ambitous and curious** love to make things run smooth and believe that everything that can be automated should be. Also, hugh intrest in *finance*, *digitalization*, *family and friends*."
         
     # Experience section
     [params.experience]
@@ -96,11 +96,11 @@ theme = "aafu"
         icon = "fas fa-briefcase"
 
         [[params.experience.list]]
-            position = "Senior Accountant"
+            position = "Controller/Senior Accountant"
             dates = "Aug 2020 - *Present*"
             link = "https://www.klarna.com/"
             company = "Klarna Bank AB"
-            details = "Work with process optimzations related to the financial reporting domain. Moreover, projectleader of the Klarnas audit process. This position carries many parameters of flexibility in order to direct my knowledge in areas most needed. In short my position mainly focus on problem solving both shortterm and more longterm in form of looking over and **adjust/improve** current processes within Klarna Bank."
+            details = "Work with process optimzations related to the financial reporting domain. Moreover, projectleader of Klarna AB's audit process. This position carries many parameters of flexibility in order to direct my knowledge in areas most needed. In short my position mainly focus on problem solving both short-term and more long-term in form of looking over and **adjust/improve** current processes within Klarna Bank."
         [[params.experience.list]]
             position = "Audit associate Financial services"
             dates = "Aug 2018 - Aug 2020"
