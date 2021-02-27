@@ -4,7 +4,6 @@ categories:
 - Thinking different
 date: "2020-02-28"
 description: Ideas on how to use this site 
-  nibh
 draft: false
 tags:
 - Knowledge library
