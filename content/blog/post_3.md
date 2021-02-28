@@ -1,17 +1,45 @@
 ---
 categories:
-- diam aliqua
-- fringilla
+- Data basic
+- 
 date: "2021-02-28"
-description: Death sins when working with data
-  dignissim
-draft: true
+description: 
+  Sumarize data in R
+draft: false
 tags:
 - Excel
 - R-studio
 - Pivot
 -
-title: Be faster with pivot tables
+title: Be faster with R 
 ---
 
-# As an auditor a comon problem when working with clients is to validate the figures produces. People working with an accounting are most likely super sharp in their field of area "producing" bookeeping. However, exactly like writing an academic report one needs to follow certain steps in order to create a product that is reliable and reproductable. By lacking the 
+Group and sum large datasets faster with R than with pivot excel.
+=======
+
+Working with bookeeping/accoutning/auditing a common feature is to use excel as the go to tool. Nothing wrong with that excel is awesome since it´s easy. However some limitation in excel is the data it can process easily (even R have limitations.). However with that said working with for instance Journal Entries or eqvivalent and one wants to sum things up this is a useful script I use to speed this up: 
+
+Start by loading the useful packages
+```js
+library(tidyverse)
+library(readr)
+```
+
+Then name your data set and performed the desired sumarization, please note this is generic naming of the variables
+dataset = represent the file
+columns in file dataset = GL/account, Currency, AMOUNT
+```js
+  data <- dataset %>% group_by(GL/acocunt, Currency) %>% 
+        summarized(AMOUNT = sum(AMOUNT))
+```
+When above data set is summarized by account and currency export it into .csv with the following.
+
+```js
+  write.csv(data, "data.csv")
+```
+Use getwd() to if you have forgotten what is set as your directory
+```js
+getwd()
+```
+
+

@@ -2,17 +2,8 @@
 title: post_4
 author: DLn
 date: '2021-02-28'
-slug: post-4
-categories: []
-draft: false
-tags:
-  - Knowledge library
+slug: []
+categories:
+  - Be digital
+tags: []
 ---
-
-
-
-```{r cars}
-summary(cars)
-fit <- lm(dist ~ speed, data = cars)
-fit
-```
