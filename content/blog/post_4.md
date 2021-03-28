@@ -1,11 +1,9 @@
 ---
 categories:
 - Data basic
--Excel
 -
 date: "2021-03-28"
-description: 
-  Two Column Vlookup function
+description: Two Column Vlookup function
 draft: false
 tags:
 - Excel
