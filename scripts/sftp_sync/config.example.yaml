@@ -1,0 +1,39 @@
+# Copy of the settings sftp_sync.py needs. Copy this file to config.yaml
+# (which should stay out of git) and fill in your real values.
+
+host: sftp.example.com
+port: 22
+username: your-username
+
+# Remote folder to pull files from, and where to put them locally.
+remote_dir: /incoming
+local_dir: ./downloads
+
+# Where to remember which files have already been copied, so reruns
+# (e.g. a daily cron job) don't re-download the same files.
+manifest_path: ./.sftp_sync_manifest.json
+
+# --- Authentication: set ONE of the two ---
+# Path to a private key file (recommended).
+key_path: ~/.ssh/id_ed25519
+# Or, name of an environment variable holding the password
+# (e.g. export SFTP_PASSWORD=... before running). Never put the
+# password itself in this file.
+# password_env: SFTP_PASSWORD
+
+# Path to a known_hosts file used to verify the server's host key.
+# Strongly recommended for anything beyond local testing; generate one
+# with: ssh-keyscan -H sftp.example.com >> known_hosts
+known_hosts_path: ./known_hosts
+
+# Only copy files matching this glob pattern (optional).
+file_pattern: "*.csv"
+
+# If true, remove the file from the SFTP server once it has been
+# copied and verified locally. Defaults to false (leave it in place).
+delete_remote_after_copy: false
+
+# Retry behaviour for transient connection/transfer failures.
+max_retries: 4
+retry_backoff_seconds: 2.0
+connect_timeout_seconds: 15

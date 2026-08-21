@@ -2,3 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# sftp_sync (see scripts/sftp_sync)
+scripts/sftp_sync/config.yaml
+scripts/sftp_sync/known_hosts
+scripts/sftp_sync/downloads/
+scripts/sftp_sync/.sftp_sync_manifest.json
+__pycache__/
+*.pyc
