@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kontraktsverktyg</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <h1>Nytt avtal</h1>
+    <form id="contract-form">
+      <fieldset>
+        <legend>Leverantör</legend>
+        <label>Namn <input name="provider.name" required /></label>
+        <label>Org.nr <input name="provider.orgNumber" required /></label>
+        <label>Ombud namn <input name="provider.representative.name" required /></label>
+        <label>Ombud telefon <input name="provider.representative.phone" required /></label>
+        <label>Ombud e-post <input name="provider.representative.email" type="email" required /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Beställare</legend>
+        <label>NetSuite externalId <input name="customer.externalId" required /></label>
+        <label>Namn <input name="customer.name" required /></label>
+        <label>Org.nr <input name="customer.orgNumber" required /></label>
+        <label>Ombud namn <input name="customer.representative.name" required /></label>
+        <label>Ombud telefon <input name="customer.representative.phone" required /></label>
+        <label>Ombud e-post <input name="customer.representative.email" type="email" required /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Faktureringsuppgifter</legend>
+        <label>E-post faktura <input name="invoicing.emailInvoice" type="email" required /></label>
+        <label>Gata <input name="invoicing.address.street" required /></label>
+        <label>Postnummer <input name="invoicing.address.zip" required /></label>
+        <label>Ort <input name="invoicing.address.city" required /></label>
+        <label>Fakturamärkning <input name="invoicing.invoiceMarking" /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Anläggning</legend>
+        <label>Gata <input name="facility.address.street" required /></label>
+        <label>Postnummer <input name="facility.address.zip" required /></label>
+        <label>Ort <input name="facility.address.city" required /></label>
+        <label>Fastighetsbeteckning <input name="facility.propertyDesignation" /></label>
+        <label>Facility UID <input name="facility.facilityUID" required /></label>
+        <label>Energimätare-ID <input name="facility.energyMeterId" required /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Avtalsperiod</legend>
+        <label>Startdatum <input name="commercialTerms.startDate" type="date" required /></label>
+        <label>Slutdatum <input name="commercialTerms.endDate" type="date" /></label>
+        <label>Valuta <input name="commercialTerms.currency" value="SEK" required /></label>
+        <label><input name="commercialTerms.autoRenewal" type="checkbox" /> Automatisk förlängning</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Avgiftsrader (tjänst + tillägg, t.ex. SIM-kort)</legend>
+        <div id="lines"></div>
+        <button type="button" id="add-line">+ Lägg till rad</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Omsättningsbaserad ersättning (valfritt)</legend>
+        <label>Pris per kWh <input name="revenueShare.pricePerKwh" type="number" step="0.01" /></label>
+        <label>Andel till leverantör (%) <input name="revenueShare.providerRevenueSharePct" type="number" step="0.1" /></label>
+        <label>Gäller från <input name="revenueShare.effectiveFrom" type="date" /></label>
+        <label>Gäller till <input name="revenueShare.effectiveTo" type="date" /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Signering</legend>
+        <label>
+          Metod
+          <select name="signing.method">
+            <option value="pdf_only">Endast PDF</option>
+            <option value="e_sign">E-signering</option>
+          </select>
+        </label>
+        <div id="signatories"></div>
+        <button type="button" id="add-signatory">+ Lägg till signatär</button>
+      </fieldset>
+
+      <input type="hidden" name="template" value="aimo_charge_installation_v1" />
+
+      <button type="submit">Kör</button>
+    </form>
+
+    <div id="result"></div>
+  </main>
+
+  <script src="form.js"></script>
+</body>
+</html>
