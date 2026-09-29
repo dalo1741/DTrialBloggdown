@@ -1,0 +1,82 @@
+# Sample data for generate_contract.py --data data.yaml --out contract.pdf
+#
+# Every key here is a field_id from fields.py. Text fields take a string;
+# checkbox fields take true/false. Checkbox fields sharing a `group` in
+# fields.py (e.g. betalning_manadsvis/kvartalsvis/arsvis) are mutually
+# exclusive - set exactly one of them to true.
+#
+# Any field left out keeps the template's placeholder (XXX / XX / DATUM /
+# unchecked) and is reported by the script as "left at default".
+
+# 2) Uppdragsgivaren (the landlord/counterparty)
+party2_namn: Exempelfastigheter AB
+party2_orgnr: "556000-0000"
+
+# Laddoperatör ("Aimo") contact box
+aimo_ombud_namn: Anna Andersson
+aimo_ombud_tel: "070-000 00 00"
+aimo_ombud_epost: anna.andersson@aimopark.se
+
+# Beställare ("Uppdragsgivaren") contact box
+bestallare_adress: Exempelvägen 1
+bestallare_postnummer: "123 45"
+bestallare_ort: Stockholm
+bestallare_ombud_namn: Björn Björnsson
+bestallare_ombud_tel: "070-111 11 11"
+bestallare_ombud_epost: bjorn.bjornsson@exempelfastigheter.se
+
+# Faktureringsuppgifter till Uppdragsgivaren
+faktura_epost: faktura@exempelfastigheter.se
+faktura_adress: Exempelvägen 1
+faktura_postnummer: "123 45"
+faktura_ort: Stockholm
+faktura_markning: PO-12345
+
+# Självfakturauppgifter till Uppdragsgivaren (Omsättningsbaserad)
+sjalvfaktura_ombud_namn: Björn Björnsson
+sjalvfaktura_ombud_tel: "070-111 11 11"
+sjalvfaktura_ombud_epost: bjorn.bjornsson@exempelfastigheter.se
+sjalvfaktura_bankgiro: "123-4567"
+sjalvfaktura_epost: sjalvfaktura@exempelfastigheter.se
+sjalvfaktura_markning: PO-12345
+
+# Anläggningsadress
+anlaggning_adress: Exempelvägen 1
+anlaggning_postnummer: "123 45"
+anlaggning_ort: Stockholm
+anlaggning_fastighetsbeteckning: Exempelfastigheten 1:1
+anlaggning_facility_uid: ""
+anlaggning_matare_id_suffix: "000000000000"   # appended after the template's literal "735999" prefix
+
+# Laddningstjänsten Aimo Charge - pricing table
+# NOTE: the template already prints the unit (kr/mån, kr, %, ...) as static
+# text right after each placeholder - give bare numbers here, no units.
+charge_antal_uttag: "10"
+charge_pris_per_uttag: "295"
+charge_summa_manad: "2 950"
+startavgift_antal_uttag: "10"
+startavgift_pris_per_uttag: "1 500"
+startavgift_summa: "15 000"
+summa_per_manad_total: "2 950"
+summa_engangskostnad_total: "15 000"
+
+# Konsumentpris
+konsument_pris_kwh: "4,50"
+konsument_ersattning_procent: "10"
+laddare_publika_ja: true
+laddare_publika_nej: false
+
+# Tilläggstjänster - Uppkoppling 4G (SIM-kort)
+sim_pris_per_manad: "89"
+sim_ska_levereras: true
+sim_antal: "10"
+sim_summa_manad: "890"
+
+# Avtalstid
+avtal_start_datum: "2026-01-01"
+avtal_slut_datum: "2026-12-31"
+
+# Betalningsvillkor (choose exactly one)
+betalning_manadsvis: true
+betalning_kvartalsvis: false
+betalning_arsvis: false
