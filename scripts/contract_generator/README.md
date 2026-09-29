@@ -30,7 +30,34 @@ installer from libreoffice.org). If LibreOffice isn't available - e.g. it's
 blocked by IT policy - skip `--out` entirely and use `--keep-docx` instead;
 see "No LibreOffice?" below.
 
-## Usage
+## Easiest way: the fill-in-the-boxes form
+
+No YAML editing required - `contract_form.py` opens a window with one
+labeled box per field, grouped and ordered to match the contract's own
+sections, with radio buttons for the either/or choices (public/private
+chargers, billing cadence) and a checkbox for the SIM-card add-on. It uses
+only Python's built-in `tkinter`, so nothing beyond `pip install -r
+requirements.txt` is needed:
+
+```bash
+python3 contract_form.py
+```
+
+Fill in the boxes, click **"Generera avtal..."**. Anything left empty or
+oddly formatted (not an email address, a date not in ÅÅÅÅ-MM-DD, a price
+field with non-numeric characters, an either/or choice with nothing picked)
+is listed before you commit, but the checks are advisory - you can still
+choose to continue. You're then asked where to save the `.docx`, and
+whether to also export a PDF (skip this if LibreOffice isn't installed -
+see "No LibreOffice?" below, opening the `.docx` in Word works the same
+way). A field left empty keeps the template's placeholder (`XXX`, `XX`,
+`DATUM`) rather than being left blank, so it stays visible as a reminder to
+fill it in later.
+
+## Scripted way: edit data.yaml and run generate_contract.py
+
+Useful for repeat runs, or generating several contracts from a script
+instead of clicking through a form each time.
 
 ```bash
 cp data.example.yaml data.yaml
