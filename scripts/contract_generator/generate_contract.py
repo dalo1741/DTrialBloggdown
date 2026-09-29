@@ -9,6 +9,14 @@ usage.
 
 Usage:
     python generate_contract.py --data data.yaml --out contract.pdf
+
+If LibreOffice (the "soffice" command) isn't installed - e.g. it's blocked
+by IT policy - drop --out and just ask for the .docx instead:
+
+    python generate_contract.py --data data.yaml --keep-docx contract.docx
+
+Then open contract.docx in Microsoft Word and use File > Save As (or
+Export > Create PDF/XPS) to get the PDF - no LibreOffice needed.
 """
 
 from __future__ import annotations
@@ -131,23 +139,35 @@ def fill_template(template_path: Path, data: dict, out_docx: Path) -> list[str]:
         return unfilled
 
 
+class LibreOfficeNotFound(RuntimeError):
+    pass
+
+
 def convert_to_pdf(docx_path: Path, out_pdf: Path) -> None:
     with tempfile.TemporaryDirectory() as profile_dir:
-        result = subprocess.run(
-            [
-                "soffice",
-                "--headless",
-                "--norestore",
-                f"-env:UserInstallation=file://{profile_dir}",
-                "--convert-to",
-                "pdf",
-                "--outdir",
-                str(out_pdf.parent),
-                str(docx_path),
-            ],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            result = subprocess.run(
+                [
+                    "soffice",
+                    "--headless",
+                    "--norestore",
+                    f"-env:UserInstallation=file://{profile_dir}",
+                    "--convert-to",
+                    "pdf",
+                    "--outdir",
+                    str(out_pdf.parent),
+                    str(docx_path),
+                ],
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise LibreOfficeNotFound(
+                "LibreOffice ('soffice') isn't installed or isn't on PATH, so the "
+                "PDF export step can't run. Drop --out and pass --keep-docx instead "
+                "to get the filled .docx, then open it in Microsoft Word and use "
+                "File > Save As > PDF (or Export > Create PDF/XPS) to finish."
+            ) from exc
         if result.returncode != 0:
             raise RuntimeError(
                 f"soffice conversion failed (exit {result.returncode}):\n"
@@ -162,12 +182,22 @@ def convert_to_pdf(docx_path: Path, out_pdf: Path) -> None:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data", type=Path, required=True, help="YAML file with field_id -> value")
-    parser.add_argument("--out", type=Path, required=True, help="Output PDF path")
+    parser.add_argument(
+        "--out", type=Path, default=None,
+        help="Output PDF path. Requires LibreOffice (soffice) to be installed. "
+             "Omit this and use --keep-docx if it isn't available.",
+    )
     parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE, help="Template .docx to fill in")
-    parser.add_argument("--keep-docx", type=Path, default=None, help="Also save the filled .docx here")
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--keep-docx", type=Path, default=None,
+        help="Save the filled .docx here. Required if --out is omitted.",
+    )
+    args = parser.parse_args(argv)
+    if args.out is None and args.keep_docx is None:
+        parser.error("pass --out (for a PDF) and/or --keep-docx (for a .docx you finish in Word)")
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -177,9 +207,18 @@ def main(argv: list[str] | None = None) -> int:
     with tempfile.TemporaryDirectory() as tmp:
         filled_docx = args.keep_docx or (Path(tmp) / "filled.docx")
         unfilled = fill_template(args.template, data, filled_docx)
-        convert_to_pdf(filled_docx, args.out)
+        if args.out is not None:
+            convert_to_pdf(filled_docx, args.out)
+            print(f"Wrote {args.out}")
+        if args.keep_docx is not None:
+            print(f"Wrote {args.keep_docx}")
+        if args.out is None:
+            print(
+                "No --out given, so no PDF was made. Open the .docx above in "
+                "Microsoft Word and use File > Save As > PDF (or Export > Create "
+                "PDF/XPS) to finish."
+            )
 
-    print(f"Wrote {args.out}")
     if unfilled:
         print(f"Note: {len(unfilled)} field(s) left at their placeholder default (not set in {args.data}):")
         for fid in unfilled:
@@ -188,4 +227,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except LibreOfficeNotFound as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(1)

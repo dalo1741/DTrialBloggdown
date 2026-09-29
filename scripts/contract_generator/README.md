@@ -22,9 +22,13 @@ untouched pixel-for-pixel.
 
 ```bash
 pip install -r requirements.txt
-# needs LibreOffice for the PDF export step
-sudo apt-get install -y libreoffice-writer
 ```
+
+The `--out` (PDF) option additionally needs LibreOffice installed for the
+export step (`sudo apt-get install -y libreoffice-writer`, or the desktop
+installer from libreoffice.org). If LibreOffice isn't available - e.g. it's
+blocked by IT policy - skip `--out` entirely and use `--keep-docx` instead;
+see "No LibreOffice?" below.
 
 ## Usage
 
@@ -42,6 +46,20 @@ so you can catch anything you forgot before sending the contract out.
 Add `--keep-docx filled.docx` to also save the intermediate, editable Word
 document (useful if the recipient wants a `.docx` instead of / alongside
 the PDF).
+
+### No LibreOffice?
+
+Drop `--out` and pass `--keep-docx` on its own - this skips the PDF export
+step entirely, so LibreOffice isn't needed at all:
+
+```bash
+python3 generate_contract.py --data data.yaml --keep-docx contract.docx
+```
+
+Then open `contract.docx` in Microsoft Word and use **File > Save As >
+PDF** (or **Export > Create PDF/XPS**) to get the PDF - Word does the same
+conversion LibreOffice would, no install required if Word is already on
+the machine.
 
 ## Fields
 
