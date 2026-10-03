@@ -18,7 +18,14 @@ re-zipped into a `.docx` and converted to PDF with LibreOffice, so every
 other part of the document (header, footer, logo, table borders, fonts) is
 untouched pixel-for-pixel.
 
-## Setup
+## No install at all: the web version
+
+**https://claude.ai/artifact/MiAnE7LKoJYhnEtvUGK53z**
+
+Same form, running entirely in your browser - no Python, no LibreOffice,
+nothing to install. See `web/README.md` for how it works.
+
+## Setup (desktop versions below)
 
 ```bash
 pip install -r requirements.txt
