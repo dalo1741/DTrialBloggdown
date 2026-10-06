@@ -535,8 +535,14 @@
   function fillDocumentXml(xmlText, data) {
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(xmlText, "application/xml");
-    if (xmlDoc.getElementsByTagName("parsererror")[0]) {
-      throw new Error("Kunde inte tolka mallens XML");
+    var parseErrorEl = xmlDoc.getElementsByTagName("parsererror")[0];
+    if (parseErrorEl) {
+      var detail = (parseErrorEl.textContent || "").replace(/\s+/g, " ").trim().slice(0, 300);
+      var preview = xmlText.slice(0, 120);
+      throw new Error(
+        "Kunde inte tolka mallens XML (" + xmlText.length + " tecken, börjar med " +
+        JSON.stringify(preview) + "): " + detail
+      );
     }
     var sdts = xmlDoc.getElementsByTagNameNS(W_NS, "sdt");
     var unfilled = [];
@@ -580,10 +586,24 @@
     return bytes.buffer;
   }
 
+  var TEMPLATE_EXPECTED_BYTES = 255125;
+
   var templateZipPromise = Promise.resolve(TEMPLATE_DOCX_BASE64)
     .then(base64ToArrayBuffer)
+    .then(function (buf) {
+      if (buf.byteLength !== TEMPLATE_EXPECTED_BYTES) {
+        throw new Error(
+          "Mallen laddades med fel storlek (" + buf.byteLength + " byte, väntade " +
+          TEMPLATE_EXPECTED_BYTES + "). Mallens base64-sträng var " + TEMPLATE_DOCX_BASE64.length + " tecken."
+        );
+      }
+      return buf;
+    })
     .then(function (buf) { return JSZip.loadAsync(buf); })
     .then(function (zip) {
+      if (!zip.file("word/document.xml")) {
+        throw new Error("Mallen saknar word/document.xml (" + Object.keys(zip.files).length + " filer hittades).");
+      }
       document.getElementById("loadStatus").textContent = "Mallen är laddad. Fyll i fälten och klicka på “Generera avtal”.";
       return zip;
     })
