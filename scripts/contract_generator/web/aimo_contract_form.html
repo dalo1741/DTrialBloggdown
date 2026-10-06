@@ -125,6 +125,20 @@
   .generate-btn:active { filter: brightness(0.96); }
   .generate-btn:disabled { opacity: 0.6; cursor: wait; }
 
+  .example-btn {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14.5px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .example-btn:hover { background: var(--accent-soft); }
+
   section.card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -228,6 +242,7 @@
         <p class="subtitle">Fyll i fälten nedan - avtalet formateras precis som originalmallen</p>
       </div>
       <span class="progress-chip" id="progressChip"><b id="progressCount">0</b> / <span id="progressTotal">0</span> fält ifyllda</span>
+      <button class="example-btn" id="exampleBtn" type="button">Fyll i exempel</button>
       <button class="generate-btn" id="generateBtn" type="button">Generera avtal</button>
     </div>
   </div>
@@ -704,6 +719,80 @@
     return Promise.resolve(null);
   }
 
+  // Same sample data as data.example.yaml, so the desktop and web
+  // versions demo identically.
+  var SAMPLE_DATA = {
+    party2_namn: "Exempelfastigheter AB",
+    party2_orgnr: "556000-0000",
+    aimo_ombud_namn: "Anna Andersson",
+    aimo_ombud_tel: "070-000 00 00",
+    aimo_ombud_epost: "anna.andersson@aimopark.se",
+    bestallare_adress: "Exempelvägen 1",
+    bestallare_postnummer: "123 45",
+    bestallare_ort: "Stockholm",
+    bestallare_ombud_namn: "Björn Björnsson",
+    bestallare_ombud_tel: "070-111 11 11",
+    bestallare_ombud_epost: "bjorn.bjornsson@exempelfastigheter.se",
+    faktura_epost: "faktura@exempelfastigheter.se",
+    faktura_adress: "Exempelvägen 1",
+    faktura_postnummer: "123 45",
+    faktura_ort: "Stockholm",
+    faktura_markning: "PO-12345",
+    sjalvfaktura_ombud_namn: "Björn Björnsson",
+    sjalvfaktura_ombud_tel: "070-111 11 11",
+    sjalvfaktura_ombud_epost: "bjorn.bjornsson@exempelfastigheter.se",
+    sjalvfaktura_bankgiro: "123-4567",
+    sjalvfaktura_epost: "sjalvfaktura@exempelfastigheter.se",
+    sjalvfaktura_markning: "PO-12345",
+    anlaggning_adress: "Exempelvägen 1",
+    anlaggning_postnummer: "123 45",
+    anlaggning_ort: "Stockholm",
+    anlaggning_fastighetsbeteckning: "Exempelfastigheten 1:1",
+    anlaggning_matare_id_suffix: "000000000000",
+    charge_antal_uttag: "10",
+    charge_pris_per_uttag: "295",
+    charge_summa_manad: "2 950",
+    startavgift_antal_uttag: "10",
+    startavgift_pris_per_uttag: "1 500",
+    startavgift_summa: "15 000",
+    summa_per_manad_total: "2 950",
+    summa_engangskostnad_total: "15 000",
+    konsument_pris_kwh: "4,50",
+    konsument_ersattning_procent: "10",
+    laddare_publika: "laddare_publika_ja",
+    sim_pris_per_manad: "89",
+    sim_ska_levereras: true,
+    sim_antal: "10",
+    sim_summa_manad: "890",
+    avtal_start_datum: "2026-01-01",
+    avtal_slut_datum: "2026-12-31",
+    betalning: "betalning_manadsvis"
+  };
+
+  function fillWithSampleData() {
+    SECTIONS.forEach(function (section) {
+      section.fields.forEach(function (f) {
+        if (f.kind === "radio") {
+          var selected = SAMPLE_DATA[f.id];
+          if (selected) {
+            var radio = document.getElementById("f_" + selected);
+            if (radio) radio.checked = true;
+          }
+        } else if (f.kind === "checkbox") {
+          var cb = document.getElementById("f_" + f.id);
+          if (cb && Object.prototype.hasOwnProperty.call(SAMPLE_DATA, f.id)) cb.checked = Boolean(SAMPLE_DATA[f.id]);
+        } else {
+          var el = document.getElementById("f_" + f.id);
+          if (el && Object.prototype.hasOwnProperty.call(SAMPLE_DATA, f.id)) el.value = SAMPLE_DATA[f.id];
+        }
+      });
+    });
+    document.getElementById("statusBanner").classList.remove("show");
+    document.getElementById("warningsPanel").style.display = "none";
+    updateProgress();
+  }
+
   document.getElementById("generateBtn").addEventListener("click", function () { runGenerate(false); });
+  document.getElementById("exampleBtn").addEventListener("click", fillWithSampleData);
 })();
 </script>
