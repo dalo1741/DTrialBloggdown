@@ -139,6 +139,85 @@
   }
   .example-btn:hover { background: var(--accent-soft); }
 
+  .view-tabs { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+  .tab-btn {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13.5px;
+    background: transparent;
+    color: var(--fg-muted);
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tab-btn.active { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+
+  .save-panel {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+  }
+  .save-panel label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .save-panel-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .save-panel-row input[type="text"] {
+    flex: 1 1 240px;
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--fg);
+  }
+
+  .contracts-header, .contract-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.3fr 0.8fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+  }
+  .contracts-header {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .contract-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+  }
+  .contract-name { font-weight: 600; }
+  .contract-type, .contract-updated { color: var(--fg-muted); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .status-pill {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-pill.status-draft { background: var(--surface-2); color: var(--fg-muted); border: 1px solid var(--border); }
+  .status-pill.status-final { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .contract-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .contract-actions .btn-ghost, .contract-actions .btn-secondary { border-color: var(--border); color: var(--fg); padding: 6px 12px; font-size: 13px; }
+  .contract-actions .btn-secondary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .confirm-text { font-size: 13px; color: var(--fg-muted); }
+
+  @media (max-width: 700px) {
+    .contracts-header { display: none; }
+    .contract-row { grid-template-columns: 1fr; gap: 4px; }
+    .contract-actions { justify-content: flex-start; }
+  }
+
   section.card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -241,18 +320,42 @@
         <h1>Aimo-avtal</h1>
         <p class="subtitle">Fyll i fälten nedan - avtalet formateras precis som originalmallen</p>
       </div>
+      <div class="view-tabs">
+        <button class="tab-btn active" id="tabFormBtn" type="button">Formulär</button>
+        <button class="tab-btn" id="tabListBtn" type="button">Mina avtal</button>
+      </div>
       <span class="progress-chip" id="progressChip"><b id="progressCount">0</b> / <span id="progressTotal">0</span> fält ifyllda</span>
+      <button class="example-btn" id="newContractBtn" type="button" hidden>Nytt avtal</button>
+      <button class="example-btn" id="saveDraftBtn" type="button">Spara utkast</button>
       <button class="example-btn" id="exampleBtn" type="button">Fyll i exempel</button>
       <button class="generate-btn" id="generateBtn" type="button">Generera avtal</button>
     </div>
   </div>
 
-  <div class="status-banner" id="statusBanner"></div>
-  <div class="warnings" id="warningsPanel" style="display:none"></div>
+  <div id="formView">
+    <div class="save-panel" id="savePanel" hidden>
+      <label for="saveNameInput">Namn på avtalet</label>
+      <div class="save-panel-row">
+        <input type="text" id="saveNameInput" placeholder="t.ex. Exempelfastigheter AB - 2026-01-01">
+        <button class="btn-secondary" id="confirmSaveBtn" type="button">Spara</button>
+        <button class="btn-ghost" id="cancelSaveBtn" type="button">Avbryt</button>
+      </div>
+    </div>
 
-  <form id="contractForm"></form>
+    <div class="status-banner" id="statusBanner"></div>
+    <div class="warnings" id="warningsPanel" style="display:none"></div>
 
-  <p class="footnote" id="loadStatus">Laddar mall...</p>
+    <form id="contractForm"></form>
+
+    <p class="footnote" id="loadStatus">Laddar mall...</p>
+  </div>
+
+  <div id="listView" hidden>
+    <div class="contracts-header">
+      <span>Namn</span><span>Typ</span><span>Senast ändrad</span><span>Status</span><span></span>
+    </div>
+    <div id="contractsList"></div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -266,6 +369,21 @@
   var UNCHECKED = "☐";
   var W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   var W14_NS = "http://schemas.microsoft.com/office/word/2010/wordml";
+
+  // ---- save/resume state (Phase 1 of the roadmap) ----
+  var currentContractId = null;         // null = unsaved new contract
+  var currentContractCreatedAt = null;  // preserved across re-saves of the same contract
+  var cachedContracts = [];             // last list() result, re-rendered locally for the delete-confirm toggle
+  var pendingDeleteId = null;
+  var TEMPLATE_ID = "aimo_charge_v1_2"; // constant for now; Phase 3 (contract templates) will vary this
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function errMsg(err) {
+    return (err && err.message) ? err.message : String(err);
+  }
 
   // ---- fields.py, ported 1:1 (same order, same sdt_index values) ----
   var FIELDS = [
@@ -696,7 +814,11 @@
         if (unfilled.length > 0) {
           html += "<br><br>" + unfilled.length + " fält lämnades med mallens platshållare (XXX/XX/DATUM) eftersom de inte fylldes i.";
         }
+        if (currentContractId) {
+          html += "<br><br>Det sparade utkastet har markerats som klart.";
+        }
         showStatus("ok", html);
+        markCurrentContractFinal();
       })
       .catch(function (err) {
         var msg = (err && err.message) ? err.message : String(err);
@@ -769,21 +891,30 @@
     betalning: "betalning_manadsvis"
   };
 
-  function fillWithSampleData() {
+  // Resets every field to `data` (or blank/unchecked when a field is
+  // absent from it) - used both for "Fyll i exempel" and for loading a
+  // saved contract back into the form, where stale values from whatever
+  // was in the form before must not survive the switch.
+  function populateForm(data) {
     SECTIONS.forEach(function (section) {
       section.fields.forEach(function (f) {
         if (f.kind === "radio") {
-          var selected = SAMPLE_DATA[f.id];
+          f.options.forEach(function (opt) {
+            var r = document.getElementById("f_" + opt[0]);
+            if (r) r.checked = false;
+          });
+          var selected = data[f.id];
           if (selected) {
             var radio = document.getElementById("f_" + selected);
             if (radio) radio.checked = true;
           }
         } else if (f.kind === "checkbox") {
           var cb = document.getElementById("f_" + f.id);
-          if (cb && Object.prototype.hasOwnProperty.call(SAMPLE_DATA, f.id)) cb.checked = Boolean(SAMPLE_DATA[f.id]);
+          if (cb) cb.checked = Object.prototype.hasOwnProperty.call(data, f.id) ? Boolean(data[f.id]) : false;
         } else {
           var el = document.getElementById("f_" + f.id);
-          if (el && Object.prototype.hasOwnProperty.call(SAMPLE_DATA, f.id)) el.value = SAMPLE_DATA[f.id];
+          if (el) el.value = Object.prototype.hasOwnProperty.call(data, f.id) ? data[f.id] : "";
+          if (el) el.classList.remove("flagged");
         }
       });
     });
@@ -792,7 +923,189 @@
     updateProgress();
   }
 
+  function fillWithSampleData() { populateForm(SAMPLE_DATA); }
+
+  // ---- view switching ----
+  function setView(view) {
+    document.getElementById("formView").hidden = (view !== "form");
+    document.getElementById("listView").hidden = (view !== "list");
+    document.getElementById("tabFormBtn").classList.toggle("active", view === "form");
+    document.getElementById("tabListBtn").classList.toggle("active", view === "list");
+    document.getElementById("progressChip").hidden = (view !== "form");
+    document.getElementById("exampleBtn").hidden = (view !== "form");
+    document.getElementById("saveDraftBtn").hidden = (view !== "form");
+    document.getElementById("generateBtn").hidden = (view !== "form");
+    document.getElementById("newContractBtn").hidden = (view !== "list");
+    if (view === "list") refreshContractsList();
+  }
+
+  function newContract() {
+    currentContractId = null;
+    currentContractCreatedAt = null;
+    populateForm({});
+    setView("form");
+  }
+
+  // ---- save/resume (db capability) ----
+  function showSavePanel() {
+    var panel = document.getElementById("savePanel");
+    var nameInput = document.getElementById("saveNameInput");
+    if (!nameInput.value) {
+      var suggestedName = document.getElementById("f_party2_namn").value.trim() || "Namnlöst avtal";
+      nameInput.value = suggestedName + " - " + new Date().toLocaleDateString("sv-SE");
+    }
+    panel.hidden = false;
+    nameInput.focus();
+    nameInput.select();
+  }
+
+  function hideSavePanel() {
+    document.getElementById("savePanel").hidden = true;
+  }
+
+  function confirmSaveDraft() {
+    var name = document.getElementById("saveNameInput").value.trim();
+    if (!name) {
+      document.getElementById("saveNameInput").focus();
+      return;
+    }
+    var saveBtn = document.getElementById("confirmSaveBtn");
+    saveBtn.disabled = true;
+
+    claudeUse("db").then(function (db) {
+      if (!db) {
+        showStatus("error", "Kunde inte spara: sparade avtal är inte tillgängligt i den här vyn.");
+        return;
+      }
+      var now = new Date().toISOString();
+      var body = {
+        name: name,
+        templateId: TEMPLATE_ID,
+        status: "draft",
+        data: collectData(),
+        createdAt: currentContractCreatedAt || now,
+        updatedAt: now
+      };
+      var ref = currentContractId ? db.doc("contracts/" + currentContractId) : db.collection("contracts").doc();
+      return ref.set(body).then(function () {
+        currentContractId = ref.id;
+        currentContractCreatedAt = body.createdAt;
+        hideSavePanel();
+        showStatus("ok", "Utkastet “" + escapeHtml(name) + "” är sparat.");
+      });
+    }).catch(function (err) {
+      showStatus("error", "Kunde inte spara utkastet: " + escapeHtml(errMsg(err)));
+    }).finally(function () {
+      saveBtn.disabled = false;
+    });
+  }
+
+  function markCurrentContractFinal() {
+    if (!currentContractId) return; // never saved as a draft - nothing to update
+    claudeUse("db").then(function (db) {
+      if (!db) return;
+      return db.doc("contracts/" + currentContractId).update({ status: "final", updatedAt: new Date().toISOString() });
+    }).catch(function () { /* non-fatal: the download already succeeded */ });
+  }
+
+  function refreshContractsList() {
+    var listEl = document.getElementById("contractsList");
+    listEl.innerHTML = '<p class="footnote">Laddar...</p>';
+    claudeUse("db").then(function (db) {
+      if (!db) {
+        listEl.innerHTML = '<p class="footnote">Sparade avtal är inte tillgängligt i den här vyn.</p>';
+        return;
+      }
+      return db.collection("contracts").orderBy("updatedAt", "desc").limit(200).get().then(function (snap) {
+        cachedContracts = snap.docs.map(function (d) { return { id: d.id, data: d.data() || {} }; });
+        pendingDeleteId = null;
+        renderContractsList();
+      });
+    }).catch(function (err) {
+      listEl.innerHTML = '<p class="footnote">Kunde inte läsa sparade avtal: ' + escapeHtml(errMsg(err)) + '</p>';
+    });
+  }
+
+  function renderContractsList() {
+    var listEl = document.getElementById("contractsList");
+    if (cachedContracts.length === 0) {
+      listEl.innerHTML = '<p class="footnote">Inga sparade avtal ännu. Fyll i formuläret och klicka “Spara utkast”.</p>';
+      return;
+    }
+    listEl.innerHTML = "";
+    cachedContracts.forEach(function (c) {
+      var d = c.data;
+      var row = document.createElement("div");
+      row.className = "contract-row";
+      var statusLabel = d.status === "final" ? "Klar" : "Utkast";
+      var updated = d.updatedAt ? new Date(d.updatedAt).toLocaleString("sv-SE", { dateStyle: "medium", timeStyle: "short" }) : "–";
+      var typeLabel = d.templateId === TEMPLATE_ID ? "Aimo Charge" : (d.templateId || "–");
+
+      var actionsHtml;
+      if (pendingDeleteId === c.id) {
+        actionsHtml =
+          '<span class="confirm-text">Ta bort permanent?</span>' +
+          '<button class="btn-secondary" data-act="confirm-delete" type="button">Ja, ta bort</button>' +
+          '<button class="btn-ghost" data-act="cancel-delete" type="button">Avbryt</button>';
+      } else {
+        actionsHtml =
+          '<button class="btn-ghost" data-act="open" type="button">Öppna</button>' +
+          '<button class="btn-ghost" data-act="delete" type="button">Ta bort</button>';
+      }
+
+      row.innerHTML =
+        '<span class="contract-name">' + escapeHtml(d.name || "(utan namn)") + '</span>' +
+        '<span class="contract-type">' + escapeHtml(typeLabel) + '</span>' +
+        '<span class="contract-updated">' + escapeHtml(updated) + '</span>' +
+        '<span class="status-pill status-' + escapeHtml(d.status || "draft") + '">' + statusLabel + '</span>' +
+        '<span class="contract-actions">' + actionsHtml + '</span>';
+
+      var openBtn = row.querySelector('[data-act="open"]');
+      if (openBtn) openBtn.addEventListener("click", function () { openContract(c.id, d); });
+      var delBtn = row.querySelector('[data-act="delete"]');
+      if (delBtn) delBtn.addEventListener("click", function () { pendingDeleteId = c.id; renderContractsList(); });
+      var cancelBtn = row.querySelector('[data-act="cancel-delete"]');
+      if (cancelBtn) cancelBtn.addEventListener("click", function () { pendingDeleteId = null; renderContractsList(); });
+      var confirmBtn = row.querySelector('[data-act="confirm-delete"]');
+      if (confirmBtn) confirmBtn.addEventListener("click", function () { deleteContract(c.id); });
+
+      listEl.appendChild(row);
+    });
+  }
+
+  function openContract(id, d) {
+    currentContractId = id;
+    currentContractCreatedAt = d.createdAt || null;
+    populateForm(d.data || {});
+    setView("form");
+  }
+
+  function deleteContract(id) {
+    claudeUse("db").then(function (db) {
+      if (!db) return;
+      return db.doc("contracts/" + id).delete().then(function () {
+        if (currentContractId === id) {
+          currentContractId = null;
+          currentContractCreatedAt = null;
+        }
+        cachedContracts = cachedContracts.filter(function (c) { return c.id !== id; });
+        pendingDeleteId = null;
+        renderContractsList();
+      });
+    }).catch(function (err) {
+      pendingDeleteId = null;
+      renderContractsList();
+      showStatus("error", "Kunde inte ta bort avtalet: " + escapeHtml(errMsg(err)));
+    });
+  }
+
   document.getElementById("generateBtn").addEventListener("click", function () { runGenerate(false); });
   document.getElementById("exampleBtn").addEventListener("click", fillWithSampleData);
+  document.getElementById("saveDraftBtn").addEventListener("click", showSavePanel);
+  document.getElementById("confirmSaveBtn").addEventListener("click", confirmSaveDraft);
+  document.getElementById("cancelSaveBtn").addEventListener("click", hideSavePanel);
+  document.getElementById("tabFormBtn").addEventListener("click", function () { setView("form"); });
+  document.getElementById("tabListBtn").addEventListener("click", function () { setView("list"); });
+  document.getElementById("newContractBtn").addEventListener("click", newContract);
 })();
 </script>

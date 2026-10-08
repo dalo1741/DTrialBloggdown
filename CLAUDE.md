@@ -59,6 +59,32 @@ Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.do
 
 Tracked here so it stays visible across sessions - update status as work completes.
 
-1. **Save and resume contracts** - not started
+1. **Save and resume contracts** - done (web version only, per scope decision below)
 2. **Branding and layout** - not started
 3. **Contract templates** - not started
+
+### Phase 1 notes (save and resume)
+
+Scoped to `web/aimo_contract_form.html` only (not the CLI or desktop GUI) -
+a few colleagues share access to the same saved contracts, via the
+Artifact `db` capability (declared alongside `downloads`). No custom `db`
+rules are set, so the default access rules apply: anyone admitted at
+Contributor level or above can read/write; sharing the artifact link (and
+at what level) is done from the page's Share menu, which Claude can't do on
+your behalf.
+
+- Collection `contracts`, one doc per saved contract: `{name, templateId,
+  status: "draft"|"final", data: {...same shape as collectData()...},
+  createdAt, updatedAt}`. `templateId` is a constant for now
+  (`"aimo_charge_v1_2"`) so Phase 3 (contract templates) can vary it later
+  without a schema change.
+- "Mina avtal" is a second view (tab) in the same page, toggled with
+  `setView()`; `populateForm(data)` (used by both "Fyll i exempel" and
+  resuming a saved contract) resets every field first, so stale values
+  from whatever was in the form don't survive a switch.
+- A saved contract's status flips from "draft" to "final" automatically
+  the moment `.docx` generation succeeds (if a draft is currently open) -
+  no separate "mark as done" action.
+- The list view does one-time `.get()` reads, not live `onSnapshot`
+  subscriptions - if colleagues editing concurrently turns out to matter,
+  that's the first thing to add.
