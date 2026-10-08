@@ -23,6 +23,16 @@ ena blockerar aldrig det andra — status för respektive spår finns separat p�
 kontraktsposten (`contractExport.status`, `netsuiteExport.status`) och kan
 pollas via `GET /api/contracts/:id`.
 
+## Varumärkesprofil (branding och layout)
+
+En global, disk-persisterad "brand profile" (`src/storage/brandProfileStore.ts`,
+`data/brand/profile.json` + `data/brand/logo.*`) styr hur alla genererade
+kontrakts-PDF:er ser ut: logga, primär-/sekundärfärg, typsnitt (begränsat
+till pdfkits inbyggda standardfonter), marginaler, sidhuvud/-fot-text och
+logotypens placering. Ställs in via `/brand.html` (`GET`/`PUT
+/api/brand-profile`, `POST`/`GET /api/brand-profile/logo`) och tillämpas i
+`src/pdf/renderContractPdf.ts` på varje genererad PDF.
+
 ## Vad som är stubbat och måste bytas ut
 
 - `src/exporters/eSignClient.ts` — riktigt API-anrop mot vald
