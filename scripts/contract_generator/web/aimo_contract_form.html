@@ -1388,13 +1388,27 @@
           return zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })
             .then(function (blob) {
               return downloads.save({ filename: template.outputFilename, data: blob }).then(function () {
+                // Same field data collectData() already produced for the
+                // .docx fill - exported alongside it as JSON so it can be
+                // read into an external system (e.g. NetSuite) without
+                // re-parsing the Word document.
+                var jsonPayload = {
+                  templateId: currentTemplateId,
+                  templateName: template.name,
+                  generatedAt: new Date().toISOString(),
+                  fields: data
+                };
+                var jsonBlob = new Blob([JSON.stringify(jsonPayload, null, 2)], { type: "application/json" });
+                var jsonFilename = template.outputFilename.replace(/\.docx$/, ".json");
+                return downloads.save({ filename: jsonFilename, data: jsonBlob });
+              }).then(function () {
                 return result.unfilled;
               });
             });
         });
       })
       .then(function (unfilled) {
-        var html = "Word-dokumentet är sparat. Öppna det i Microsoft Word och använd " +
+        var html = "Word-dokumentet och en JSON-fil med fältvärdena är sparade. Öppna dokumentet i Microsoft Word och använd " +
           "<b>Arkiv &gt; Spara som &gt; PDF</b> (eller <b>Exportera &gt; Skapa PDF/XPS</b>) för att få PDF:en.";
         if (unfilled.length > 0) {
           html += "<br><br>" + unfilled.length + " fält lämnades med mallens platshållare (XXX/XX/DATUM) eftersom de inte fylldes i.";

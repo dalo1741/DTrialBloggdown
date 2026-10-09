@@ -51,6 +51,10 @@ Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.do
 
 `generate_contract.py --out contract.pdf` additionally requires LibreOffice (`soffice` on PATH) for the PDF conversion step. `--keep-docx` alone skips that entirely; the resulting `.docx` can be converted with Word's own **File > Save As > PDF**. The web version has no PDF export at all for the same reason (no LibreOffice available client-side) - it always stops at the `.docx` download.
 
+### JSON export (for downstream systems, e.g. NetSuite)
+
+The web version downloads a second file alongside the `.docx` on every successful "Generera avtal" - same base filename, `.json` instead, `{templateId, templateName, generatedAt, fields}` where `fields` is exactly what `collectData()` produced for the `.docx` fill (all filled fields, radio groups expanded into their individual boolean option ids, same as the save/resume payload's `data`). No NetSuite-specific field mapping or endpoint - this is the raw collected data as a file the user downloads alongside the contract, not a push integration. Not implemented in the CLI or desktop GUI.
+
 ### Running outside Claude
 
 `web/aimo_contract_form.html` detects at load time whether `window.claude`
