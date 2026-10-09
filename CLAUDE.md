@@ -38,7 +38,7 @@ Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.do
 **Three interfaces share the same underlying field model**, so a template change must be applied to all three:
 - `generate_contract.py` - CLI, takes a YAML data file (`data.example.yaml` is the schema reference)
 - `contract_form.py` - Tkinter desktop GUI (stdlib only, no extra dependency beyond the base `requirements.txt`)
-- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64). No Python/LibreOffice needed. The same file runs two ways - see "Running outside Claude" below for how it detects which one it's in. Its `FIELDS`/`SECTIONS` arrays and fill logic are a hand-ported copy of `fields.py`/`form_fields.py` - **keep them in sync manually**, there's no shared build step between Python and this HTML file.
+- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64). No Python/LibreOffice needed. The same file runs two ways - see "Running outside Claude" below for how it detects which one it's in. **Multi-template since Phase 3** (see Roadmap below) - the CLI/desktop GUI are still single-template (the original Aimo Charge contract only); the web version's `FIELDS_CHARGE`/`SECTIONS_CHARGE` arrays are the hand-ported copy of `fields.py`/`form_fields.py` - **keep them in sync manually**, there's no shared build step between Python and this HTML file. The other templates (`FIELDS_HARDWARE`/`FIELDS_ARRENDE`, etc.) exist only in the web version, with no Python equivalent.
 
 ### The field model
 
@@ -78,7 +78,9 @@ repointed there if the page is meant to stay live long-term.
 
 ### Extending to a different template
 
-`fields.py`'s `sdt_index` values are specific to `template/Avtal_Aimo_Charge_Fee_to_Landlord_v1.2.docx`'s content controls. To adapt this to a different contract, unzip it and walk its `<w:sdt>` elements in `word/document.xml` in document order to rebuild the field list - each one's surrounding paragraph/table-cell text identifies what it's for.
+`fields.py`'s `sdt_index` values are specific to `template/Avtal_Aimo_Charge_Fee_to_Landlord_v1.2.docx`'s content controls. To adapt the **Python/CLI/desktop** side to a different contract, unzip it and walk its `<w:sdt>` elements in `word/document.xml` in document order to rebuild the field list - each one's surrounding paragraph/table-cell text identifies what it's for.
+
+For the **web version**, see the Phase 3 roadmap notes below - it also has to handle templates built on Word's legacy Form Field mechanism, not just content controls.
 
 ## Roadmap
 
@@ -86,7 +88,9 @@ Tracked here so it stays visible across sessions - update status as work complet
 
 1. **Save and resume contracts** - done (web version only, per scope decision below)
 2. **Branding and layout** - not started
-3. **Contract templates** - not started
+3. **Contract templates** - in progress: architecture done, 2 of ~10-15 planned
+   contract types added (web version only, per scope decision below) - more
+   to come as templates are supplied
 
 ### Phase 1 notes (save and resume)
 
@@ -113,3 +117,65 @@ your behalf.
 - The list view does one-time `.get()` reads, not live `onSnapshot`
   subscriptions - if colleagues editing concurrently turns out to matter,
   that's the first thing to add.
+
+### Phase 3 notes (contract templates)
+
+Scoped to `web/aimo_contract_form.html` only, same as Phase 1 - the CLI and
+desktop GUI stay single-template (Aimo Charge) until someone asks for them
+to be extended too.
+
+- **`TEMPLATES`** (in the inline script) is the registry: one entry per
+  contract type, keyed by a `templateId` string (the same value Phase 1's
+  saved-contract docs store). Each entry names its `mechanism`
+  (`"sdt"` or `"formtext"`, see below), its own `FIELDS_*`/`SECTIONS_*`
+  arrays, embedded base64 (`TEMPLATE_DOCX_BASE64_*`) and expected byte
+  size, output filename, and `nameHintField` (which field seeds the
+  save-draft panel's suggested name).
+- A new **template picker** is the landing view inside "Formulär" whenever
+  no template is active (`currentTemplateId === null`) - cards built from
+  `TEMPLATES` at load time, each with a "Välj" button calling
+  `selectTemplate(id)`. "Byt avtalstyp" in the topbar returns to it.
+  "Nytt avtal" (from "Mina avtal") also returns to the picker now, rather
+  than reopening the previous template's blank form - the user picks a
+  type first, same as a brand-new contract.
+- **Two fill mechanisms**, because not every Word template uses content
+  controls:
+  - `"sdt"` (`fillSdt`) - the original mechanism: edits native `<w:sdt>`
+    content controls, addressed by `sdtIndex` (document-order position).
+  - `"formtext"` (`fillFormText`) - for templates built with the older,
+    pre-2010 Word "Form Field" mechanism (`FORMTEXT`/`FORMCHECKBOX`/
+    `FORMDROPDOWN` fields, i.e. `w:fldChar` begin/separate/end triples
+    with a `w:ffData`). Addressed by `index` (position among all such
+    fields), the same idea as `sdtIndex`, because field `w:name` values in
+    a template built this way are frequently blank or reused across many
+    unrelated fields and so can't be trusted as a stable key. A `"dropdown"`
+    field kind exists only here (`FORMDROPDOWN`'s `w:ddList`/`w:result` -
+    an index into the field's own `opts` list, not free text).
+    `blankPositions` on a field marks extra adjacent field slots that are
+    one logical blank split across several field instances (a template
+    authoring artifact) - they're force-cleared whenever that field is
+    written, so nothing duplicates in the output.
+  - Figuring out which mechanism (and, for `formtext`, which field index
+    maps to which blank) a new template uses takes unzipping it and
+    walking `word/document.xml` by hand - there's no shortcut for a
+    `formtext` template given how unreliable `w:name` is; expect to
+    cross-reference each field against its surrounding paragraph/table-row
+    text the same way `fields.py`'s module docstring describes for `sdt`.
+- **Labels are a fast pass**, not hand-polished like the original Aimo
+  Charge template's: `SECTIONS_HARDWARE`/`SECTIONS_ARRENDE` mostly reuse
+  the template's own wording as the field label rather than a rewritten
+  one. Given ~10-15 contract types total, this was a deliberate
+  speed-over-polish call - revisit specific labels on request.
+- Every template's zip is loaded lazily and memoized per `templateId`
+  (`getTemplateZip`/`templateZipPromises`) - only the one the user actually
+  picks gets base64-decoded, not all of them up front.
+- Fixed in passing: `fillSdt`/`fillFormText`'s XML serialization
+  unconditionally prepended its own `<?xml ...?>` declaration on top of
+  the one the browser's `XMLSerializer` already re-emits from the parsed
+  template, producing two declarations back to back. Well-formedness
+  checks (`DOMParser`, Chromium rendering) tolerated it, but LibreOffice
+  rejected the file outright ("source file could not be loaded") - this
+  affected the original Aimo Charge template too, not just the new ones,
+  and had never been caught because the web path's output was never
+  round-tripped through a strict parser before. `serializeXml()` now
+  strips any existing declaration before adding its own.
