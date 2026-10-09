@@ -33,13 +33,29 @@ Stack:
   disk-persisted JSON for longer-lived config like the brand profile.
 - No authentication yet (`/api/*` is open).
 
+Request flow: `POST /api/contracts` validates with zod, saves the draft to
+the in-memory store, then calls `emitContractSubmitted` (`src/events.ts`),
+an in-process `EventEmitter`. `server.ts` registers one listener per export
+track (`exportContractDocument`, `exportToNetsuite`) on that same event —
+this EventEmitter fan-out is what actually implements the "independent
+tracks" guarantee, since an error thrown in one listener doesn't reach the
+other. Each track writes its own status back onto the contract record
+(`contractExport.status` / `netsuiteExport.status`), pollable via
+`GET /api/contracts/:id`. Generated PDFs and the persisted brand
+profile/logo live under `data/` (gitignored).
+
 Commands (run from `contract-tool/`):
 ```bash
 npm install
-npm run dev        # tsx watch src/server.ts
-npm run typecheck   # tsc --noEmit
-npm run build       # tsc -p tsconfig.json
+cp .env.example .env   # only needed for real e-sign/NetSuite credentials
+npm run dev          # tsx watch src/server.ts, http://localhost:3000
+npm run typecheck    # tsc --noEmit
+npm run build        # tsc -p tsconfig.json
+npm start             # node dist/server.js (after build)
 ```
+
+There is no automated test suite yet — verify changes by running `npm run
+dev` and exercising the form/API manually, plus `npm run typecheck`.
 
 Conventions to follow:
 - Source comments in this codebase are written in Swedish, matching the
