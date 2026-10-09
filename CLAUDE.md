@@ -85,15 +85,50 @@ Conventions to follow:
   contract PDF export would fail while an SVG logo was active. Verified
   end-to-end against an exported contract PDF (PNG + SVG logos, all three
   logo positions, custom colors/font/margins/header/footer text).
-- **Phase 3 (in progress):** contract templates — define new contract types
-  as templates with fixed text plus `{{placeholder}}` fields (e.g.
-  `{{party_name}}`, `{{start_date}}`, `{{amount}}`); create/edit/duplicate/
-  delete templates in the app; "new contract" = pick a template, fill in
-  fields, brand profile applied. Done when: a new contract type can be
-  defined without touching code.
+- **Phase 3 (done):** contract templates — `src/types/contractTemplate.ts` +
+  `src/storage/templateStore.ts` (disk-persisted JSON, one file per template
+  under `data/templates/`, same pattern as the brand profile). CRUD via
+  `/templates.html` (`/api/templates`, `/api/templates/:id`,
+  `/api/templates/:id/duplicate`). A template is a name + free-text body
+  with `{{placeholder}}` fields — **the field list is auto-detected from the
+  body text** (regex-extracted placeholder names, in order of first
+  appearance), not declared separately; editing the body text live-updates
+  the field list in the UI. "New contract" = `/new-template-contract.html`:
+  pick a template → dynamically rendered form (one input per field, typed
+  text/number/date) → `POST /api/templates/:id/render`, which validates
+  against a zod schema built at request time from the template's fields
+  (`buildFieldValuesSchema`), substitutes placeholders, and returns a
+  branded PDF synchronously (`src/pdf/renderTemplatedContract.ts` — no
+  NetSuite/e-sign track for this contract type, see key decision below).
+  `src/pdf/pdfHeader.ts` was extracted from `renderContractPdf.ts` (shared
+  `drawHeader`/`drawFooters`, used by both renderers so the brand profile
+  looks identical either way). Verified end-to-end: created a template via
+  the UI, confirmed live field auto-detection, generated a branded PDF
+  (logo/colors/font/margins all present), and exercised duplicate/edit/
+  delete — all without touching code.
+
+  Key decisions (flagged and approved before building):
+  - **Templates are a parallel system, not a replacement.** They produce a
+    PDF only; they do **not** plug into `exportToNetsuite`/`eSignClient` —
+    those stay scoped to the existing fixed Aimo Park `Contract` flow
+    (`src/types/contract.ts`), which is untouched. The tool now has two
+    contract concepts side by side (approved trade-off; Phase 3's spec never
+    mentioned NetSuite/e-signing).
+  - **Template body is plain text, not markup.** `{{field}}` substitution
+    into paragraphs (blank-line-separated) flowed through pdfkit
+    `doc.text()` — no bold/headings/tables inside a template's body, and no
+    new rendering dependency.
+  - **Fields are derived from the text, never hand-declared** — a template
+    editor only adds a label/type override per detected placeholder key.
 - **Phase 4 (not started):** TBD — likely real e-sign provider integration,
   real NetSuite SuiteTalk client, and persistent (non-in-memory) contract
-  storage, per the "Nästa steg" list in `contract-tool/README.md`.
+  storage, per the "Nästa steg" list in `contract-tool/README.md`. Note for
+  whoever picks this up: if/when Phase 4 unifies the two contract concepts
+  (templated contracts currently have no NetSuite export or persistent
+  "submitted contract" record — `/api/templates/:id/render` is fire-and-forget,
+  nothing is stored beyond the generated PDF file), that's a bigger decision
+  than Phase 4's original scope implies and should probably be flagged back
+  to the user rather than assumed.
 
 When picking up a phase, read the relevant code first, propose a plan, and
 wait for approval before writing code, unless explicitly told to proceed

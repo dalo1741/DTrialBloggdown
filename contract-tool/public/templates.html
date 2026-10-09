@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kontraktsmallar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <nav>
+      <a href="index.html">Nytt avtal</a> ·
+      <a href="new-template-contract.html">Nytt avtal från mall</a> ·
+      <a href="brand.html">Varumärkesprofil</a>
+    </nav>
+    <h1>Kontraktsmallar</h1>
+
+    <fieldset>
+      <legend>Befintliga mallar</legend>
+      <div id="template-list">Laddar...</div>
+    </fieldset>
+
+    <form id="template-form">
+      <fieldset>
+        <legend id="form-legend">Ny mall</legend>
+        <label>Namn <input name="name" required /></label>
+        <label>
+          Brödtext (använd <code>{{fältnamn}}</code> för platshållare, t.ex. <code>{{party_name}}</code>,
+          <code>{{start_date}}</code>, <code>{{amount}}</code>. Tomrad = nytt stycke.)
+          <textarea name="bodyText" id="body-text" rows="12" required></textarea>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Fält (identifieras automatiskt ur texten ovan)</legend>
+        <div id="field-rows"><p id="no-fields-hint">Inga <code>{{...}}</code>-platshållare hittades ännu.</p></div>
+      </fieldset>
+
+      <button type="submit" id="submit-button">Spara mall</button>
+      <button type="button" id="cancel-edit" hidden>Avbryt redigering</button>
+    </form>
+
+    <div id="result"></div>
+  </main>
+
+  <script src="templates.js"></script>
+</body>
+</html>

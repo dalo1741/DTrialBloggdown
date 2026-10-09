@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nytt avtal från mall</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <nav>
+      <a href="index.html">Nytt avtal</a> ·
+      <a href="templates.html">Kontraktsmallar</a> ·
+      <a href="brand.html">Varumärkesprofil</a>
+    </nav>
+    <h1>Nytt avtal från mall</h1>
+
+    <label>Välj mall
+      <select id="template-select"><option value="">Laddar mallar...</option></select>
+    </label>
+
+    <form id="fields-form" hidden>
+      <fieldset>
+        <legend>Fält</legend>
+        <div id="dynamic-fields"></div>
+      </fieldset>
+      <button type="submit">Generera PDF</button>
+    </form>
+
+    <div id="result"></div>
+  </main>
+
+  <script src="new-template-contract.js"></script>
+</body>
+</html>

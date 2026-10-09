@@ -33,6 +33,25 @@ logotypens placering. Ställs in via `/brand.html` (`GET`/`PUT
 /api/brand-profile`, `POST`/`GET /api/brand-profile/logo`) och tillämpas i
 `src/pdf/renderContractPdf.ts` på varje genererad PDF.
 
+## Kontraktsmallar (Phase 3)
+
+Ett andra, fristående kontraktsflöde vid sidan av det fasta Aimo Park-schemat:
+`src/types/contractTemplate.ts` + `src/storage/templateStore.ts` låter dig
+definiera en mall (namn + fri text) med `{{platshållare}}` i texten -
+fältlistan härleds automatiskt ur texten, inget separat fältschema att hålla
+i synk. CRUD via `/templates.html` (`/api/templates`, `/api/templates/:id`,
+`/api/templates/:id/duplicate`). Ett konkret avtal skapas via
+`/new-template-contract.html`: välj mall → dynamiskt formulär (ett fält per
+platshållare, typvaliderat med ett zod-schema som byggs vid körning i
+`buildFieldValuesSchema`) → `POST /api/templates/:id/render` ersätter
+platshållarna och renderar en branded PDF direkt (`src/pdf/renderTemplatedContract.ts`,
+synkront - inget NetSuite/e-sign-spår för den här kontraktstypen).
+
+`src/pdf/pdfHeader.ts` innehåller den delade sidhuvud/-fot-logiken
+(logga/färger/marginaler enligt varumärkesprofilen) som både
+`renderContractPdf.ts` (Aimo Park) och `renderTemplatedContract.ts` (mallar)
+återanvänder.
+
 ## Vad som är stubbat och måste bytas ut
 
 - `src/exporters/eSignClient.ts` — riktigt API-anrop mot vald
