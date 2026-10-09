@@ -38,7 +38,7 @@ Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.do
 **Three interfaces share the same underlying field model**, so a template change must be applied to all three:
 - `generate_contract.py` - CLI, takes a YAML data file (`data.example.yaml` is the schema reference)
 - `contract_form.py` - Tkinter desktop GUI (stdlib only, no extra dependency beyond the base `requirements.txt`)
-- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64) and hands the result to the viewer via the Artifact `downloads` capability. No Python/LibreOffice needed, but it only works as a *hosted* page (via Claude Artifacts) because local `file://` pages have no download capability. Its `FIELDS`/`SECTIONS` arrays and fill logic are a hand-ported copy of `fields.py`/`form_fields.py` - **keep them in sync manually**, there's no shared build step between Python and this HTML file.
+- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64). No Python/LibreOffice needed. The same file runs two ways - see "Running outside Claude" below for how it detects which one it's in. Its `FIELDS`/`SECTIONS` arrays and fill logic are a hand-ported copy of `fields.py`/`form_fields.py` - **keep them in sync manually**, there's no shared build step between Python and this HTML file.
 
 ### The field model
 
@@ -50,6 +50,31 @@ Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.do
 ### PDF export
 
 `generate_contract.py --out contract.pdf` additionally requires LibreOffice (`soffice` on PATH) for the PDF conversion step. `--keep-docx` alone skips that entirely; the resulting `.docx` can be converted with Word's own **File > Save As > PDF**. The web version has no PDF export at all for the same reason (no LibreOffice available client-side) - it always stops at the `.docx` download.
+
+### Running outside Claude
+
+`web/aimo_contract_form.html` detects at load time whether `window.claude`
+exists (`isStandalone` near the top of the inline script) and swaps in
+fallbacks for both capabilities it uses, so the one file works both ways
+with no build step or separate copy:
+
+- **`downloads`** - falls back to a plain `<a download>` Blob link
+  (`localDownloads`). This has no downsides outside Claude - the Artifact
+  sandbox is what needed the capability in the first place, a normal page
+  doesn't.
+- **`db`** (save/resume, Phase 1) - falls back to `localStorage`
+  (`makeLocalDb()`), mirroring the same `doc`/`collection`/`get`/`set`/
+  `update`/`delete`/`orderBy`/`limit` shape the Artifact `db` capability
+  uses. **Per-browser only** - saved contracts are not shared between
+  colleagues the way the Artifact-hosted version's are. The "Mina avtal"
+  view shows a notice when running standalone to make this explicit.
+
+Hosted on GitHub Pages (enabled on this repo, serving from this branch,
+root path) at:
+`https://dalo1741.github.io/DTrialBloggdown/scripts/contract_generator/web/aimo_contract_form.html`
+Pages serves the branch's tree as-is (`.nojekyll` at the repo root skips
+Jekyll processing) - once this branch is merged to `main`, Pages should be
+repointed there if the page is meant to stay live long-term.
 
 ### Extending to a different template
 
