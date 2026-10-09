@@ -72,10 +72,26 @@ Conventions to follow:
 
 - **Phase 1 (done):** form → validation → contract model → two independent
   export tracks (PDF/e-sign stub, NetSuite stub). In-memory storage.
-- **Phase 2 (in progress):** branding and layout — upload a company logo,
-  set brand colors/font, configure margins/header/footer/logo position, as
-  a reusable "brand profile" applied to all exported contract PDFs.
-- **Phase 3 (not started):** TBD — likely real e-sign provider integration,
+- **Phase 2 (done):** branding and layout — a global, disk-persisted brand
+  profile (`src/types/brandProfile.ts`, `src/storage/brandProfileStore.ts`,
+  `data/brand/`) covering logo upload, primary/secondary colors, font
+  (pdfkit's built-in standard fonts only), margins, header/footer text, and
+  logo position (left/center/right). Configured via `/brand.html`
+  (`GET`/`PUT /api/brand-profile`, `POST`/`GET /api/brand-profile/logo`) and
+  applied to every generated PDF in `src/pdf/renderContractPdf.ts`. Key
+  decision: an uploaded SVG logo is rasterized to PNG server-side at upload
+  time (`@resvg/resvg-js`, in `brandProfileStore.saveBrandLogo`) because
+  pdfkit's `doc.image()` has no native SVG support — without this, every
+  contract PDF export would fail while an SVG logo was active. Verified
+  end-to-end against an exported contract PDF (PNG + SVG logos, all three
+  logo positions, custom colors/font/margins/header/footer text).
+- **Phase 3 (in progress):** contract templates — define new contract types
+  as templates with fixed text plus `{{placeholder}}` fields (e.g.
+  `{{party_name}}`, `{{start_date}}`, `{{amount}}`); create/edit/duplicate/
+  delete templates in the app; "new contract" = pick a template, fill in
+  fields, brand profile applied. Done when: a new contract type can be
+  defined without touching code.
+- **Phase 4 (not started):** TBD — likely real e-sign provider integration,
   real NetSuite SuiteTalk client, and persistent (non-in-memory) contract
   storage, per the "Nästa steg" list in `contract-tool/README.md`.
 
