@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { Resvg } from "@resvg/resvg-js";
 import {
   type BrandLogo,
   type BrandProfile,
@@ -50,10 +51,16 @@ export function saveBrandProfile(input: BrandProfileInput): BrandProfile {
 }
 
 export function saveBrandLogo(buffer: Buffer, mimeType: string): BrandLogo {
-  const ext = MIME_TO_EXT[mimeType];
-  if (!ext) {
+  if (!(mimeType in MIME_TO_EXT)) {
     throw new Error(`Okänd logotyp-filtyp: ${mimeType}`);
   }
+
+  // pdfkit kan bara rita in PNG/JPEG (doc.image stödjer inte SVG), så en
+  // uppladdad SVG rastreras till PNG direkt - annars failar PDF-genereringen
+  // för alla kontrakt sa fort en SVG-logga är aktiv.
+  const [storedBuffer, storedMimeType] =
+    mimeType === "image/svg+xml" ? [rasterizeSvg(buffer), "image/png"] : [buffer, mimeType];
+  const ext = MIME_TO_EXT[storedMimeType];
 
   fs.mkdirSync(BRAND_DIR, { recursive: true });
 
@@ -66,12 +73,17 @@ export function saveBrandLogo(buffer: Buffer, mimeType: string): BrandLogo {
   }
 
   const fileName = `logo.${ext}`;
-  fs.writeFileSync(path.join(BRAND_DIR, fileName), buffer);
+  fs.writeFileSync(path.join(BRAND_DIR, fileName), storedBuffer);
 
-  const logo: BrandLogo = { fileName, mimeType, updatedAt: new Date().toISOString() };
+  const logo: BrandLogo = { fileName, mimeType: storedMimeType, updatedAt: new Date().toISOString() };
   const current = readProfileFile();
   writeProfileFile({ ...current, logo, updatedAt: new Date().toISOString() });
   return logo;
+}
+
+function rasterizeSvg(buffer: Buffer): Buffer {
+  const resvg = new Resvg(buffer, { fitTo: { mode: "width", value: 480 } });
+  return resvg.render().asPng();
 }
 
 export function getLogoFilePath(): string | null {
