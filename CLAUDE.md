@@ -173,6 +173,14 @@ to be extended too.
 - Every template's zip is loaded lazily and memoized per `templateId`
   (`getTemplateZip`/`templateZipPromises`) - only the one the user actually
   picks gets base64-decoded, not all of them up front.
+- **"Fyll i exempel" needs its own `SAMPLE_DATA_*` per template** -
+  `fillWithSampleData()` looks one up in `SAMPLE_DATA_BY_TEMPLATE` keyed by
+  `templateId` and shows an error status if none exists for the active
+  template. First version of this shipped without `SAMPLE_DATA_HARDWARE`/
+  `SAMPLE_DATA_ARRENDE`, so the button silently (from the user's
+  perspective) did nothing for those two until a user reported it -
+  add a sample alongside any future `FIELDS_*`/`SECTIONS_*` pair, not
+  after the fact.
 - Fixed in passing: `fillSdt`/`fillFormText`'s XML serialization
   unconditionally prepended its own `<?xml ...?>` declaration on top of
   the one the browser's `XMLSerializer` already re-emits from the parsed

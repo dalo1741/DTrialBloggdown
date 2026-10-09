@@ -1615,6 +1615,124 @@
     betalning: "betalning_manadsvis"
   };
 
+  var SAMPLE_DATA_HARDWARE = {
+    party2_namn: "Exempelfastigheter AB",
+    party2_orgnr: "556000-0000",
+    aimo_ombud_namn: "Anna Andersson",
+    aimo_ombud_tel: "070-000 00 00",
+    aimo_ombud_epost: "anna.andersson@aimopark.se",
+    bestallare_adress: "Exempelvägen 1",
+    bestallare_postnummer: "123 45",
+    bestallare_ort: "Stockholm",
+    bestallare_ombud_namn: "Björn Björnsson",
+    bestallare_ombud_tel: "070-111 11 11",
+    bestallare_ombud_epost: "bjorn.bjornsson@exempelfastigheter.se",
+    faktura_epost: "faktura@exempelfastigheter.se",
+    faktura_adress: "Exempelvägen 1",
+    faktura_postnummer: "123 45",
+    faktura_ort: "Stockholm",
+    faktura_markning: "PO-12345",
+    sjalvfaktura_ombud_namn: "Björn Björnsson",
+    sjalvfaktura_ombud_tel: "070-111 11 11",
+    sjalvfaktura_ombud_epost: "bjorn.bjornsson@exempelfastigheter.se",
+    sjalvfaktura_bankgiro: "123-4567",
+    sjalvfaktura_epost: "sjalvfaktura@exempelfastigheter.se",
+    sjalvfaktura_markning: "PO-12345",
+    anlaggning_adress: "Exempelvägen 1",
+    anlaggning_postnummer: "123 45",
+    anlaggning_ort: "Stockholm",
+    anlaggning_fastighetsbeteckning: "Exempelfastigheten 1:1",
+    anlaggning_matare_id_suffix: "000000000000",
+    charge_antal_uttag: "10",
+    charge_pris_per_uttag: "295",
+    charge_summa_manad: "2 950",
+    startavgift_antal_uttag: "10",
+    startavgift_pris_per_uttag: "1 500",
+    startavgift_summa: "15 000",
+    summa_per_manad_total: "2 950",
+    summa_engangskostnad_total: "15 000",
+    konsument_pris_kwh: "4,50",
+    konsument_ersattning_procent: "10",
+    laddare_publika: "laddare_publika_ja",
+    hardvara_kostnad: "85 000",
+    installation_kostnad: "25 000",
+    tillbehor_kostnad: "5 000",
+    totalkostnad: "115 000",
+    antal_laddboxar: "5",
+    antal_ladduttag: "10",
+    sim_pris_per_manad: "89",
+    sim_ska_levereras: true,
+    sim_antal: "10",
+    sim_summa_manad: "890",
+    bidrag_ladda_bilen: false,
+    bidrag_ladda_bilen_kostnad: "0",
+    bidrag_klimatklivet: false,
+    bidrag_klimatklivet_kostnad: "0",
+    bidrag_slutrapportering: false,
+    bidrag_slutrapportering_kostnad: "0",
+    arlig_kontroll: true,
+    arlig_kontroll_kostnad: "1 200",
+    avtal_start_datum: "2026-01-01",
+    avtal_slut_datum: "2026-12-31",
+    betalning: "betalning_manadsvis"
+  };
+
+  var SAMPLE_DATA_ARRENDE = {
+    driftstalle_nr: "4711",
+    avtalsnummer: "A-2026-001",
+    uppdragsgivarnr: "99001",
+    fastighetsagare_namn: "Exempelfastigheter AB",
+    fastighetsagare_orgnr: "556000-0000",
+    fastighetsagare_momsnr: "5560000000",
+    arrendestalle_kommun: "Stockholm",
+    arrendestalle_fastighetsbeteckning: "Exempelkvarteret 1",
+    arrendestalle_adress: "Exempelvägen 1",
+    antal_parkeringsplatser: "120",
+    arrendestalle_sarskilda_villkor: "Inga särskilda villkor.",
+    avtal_start_datum: "2026-01-01",
+    avtal_slut_datum: "2028-12-31",
+    uppsagningstid_antal_ord: "tre",
+    uppsagningstid_antal_siffror: "3",
+    uppsagningstid_enhet: "månader",
+    forlangningstid_antal_ord: "ett",
+    forlangningstid_antal_siffror: "1",
+    forlangningstid_enhet: "år",
+    arrende_procent_ord: "tio",
+    arrende_procent_siffror: "10",
+    faktureringsperiod: "kalendermånad",
+    betalningssatt: "bankgiro",
+    bankgiro_plusgiro_nr: "123-4567",
+    arbete_a_arrendestallet_ersattning: "Fastighetsägaren skall ersätta Arrendatorn enligt gällande månadshyra för de parkeringsplatser som inte kan nyttjas.",
+    ansvar_parkeringsovervakning: "Skall ombesörjas och bekostas av Arrendatorn.",
+    ansvar_kundservice_kontrollavgifter: "Skall ombesörjas och bekostas av Arrendatorn.",
+    ansvar_uppfoljning_indrivning: "Skall ombesörjas och bekostas av Arrendatorn.",
+    ansvar_stadning: "Skall ombesörjas och bekostas av Fastighetsägaren.",
+    ansvar_uthyrning_langtid: "Skall ombesörjas och bekostas av Arrendatorn.",
+    ansvar_eldragning: "Skall ombesörjas och bekostas av Fastighetsägaren.",
+    ansvar_motorvarmare: "Skall ombesörjas och bekostas av Fastighetsägaren.",
+    ansvar_belysning: "Skall ombesörjas och bekostas av Fastighetsägaren.",
+    ansvar_skyltprogram: "Skall ombesörjas och bekostas av Fastighetsägaren.",
+    parkeringstillstand: "parkeringstillstand_enligt_prislista",
+    pskivor: "pskivor_ej_aktuellt",
+    tidigare_avtal: "nytt_avtal",
+    bilaga2_inkluderad: false,
+    bilaga3_inkluderad: false,
+    bilaga4_inkluderad: false,
+    fastighetsagare_ort_datum: "Stockholm, 2026-01-01",
+    arrendator_datum: "2026-01-01",
+    fastighetsagare_namnfortydligande: "Anna Andersson",
+    fastighetsagare_kontakt_redovisning_namn: "Anna Andersson",
+    fastighetsagare_kontakt_redovisning_mail: "anna.andersson@exempelfastigheter.se",
+    fastighetsagare_kontakt_redovisning_tel: "070-000 00 00",
+    fastighetsagare_redovisningsadress: "Exempelvägen 1, 123 45 Stockholm",
+    fastighetsagare_kontakt_drift_namn: "Björn Björnsson",
+    fastighetsagare_kontakt_drift_mail: "bjorn.bjornsson@exempelfastigheter.se",
+    fastighetsagare_kontakt_drift_tel: "070-111 11 11",
+    arrendator_kontakt_drift_namn: "Carl Carlsson",
+    arrendator_kontakt_drift_mail: "carl.carlsson@aimopark.se",
+    arrendator_kontakt_drift_tel: "08-722 15 00"
+  };
+
   // Resets every field to `data` (or blank/unchecked when a field is
   // absent from it) - used both for "Fyll i exempel" and for loading a
   // saved contract back into the form, where stale values from whatever
@@ -1647,9 +1765,16 @@
     updateProgress();
   }
 
+  var SAMPLE_DATA_BY_TEMPLATE = {
+    aimo_charge_v1_2: SAMPLE_DATA,
+    aimo_charge_hardware_v1_2: SAMPLE_DATA_HARDWARE,
+    arrende_omsattning_v1: SAMPLE_DATA_ARRENDE
+  };
+
   function fillWithSampleData() {
-    if (currentTemplateId === "aimo_charge_v1_2") {
-      populateForm(SAMPLE_DATA);
+    var sample = SAMPLE_DATA_BY_TEMPLATE[currentTemplateId];
+    if (sample) {
+      populateForm(sample);
     } else {
       showStatus("error", "Det finns inget exempel för den här avtalstypen än.");
     }
