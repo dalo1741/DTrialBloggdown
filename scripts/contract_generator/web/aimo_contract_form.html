@@ -1132,6 +1132,12 @@
   }
 
   function parseTemplateXml(xmlText) {
+    // JSZip's .async("string") decodes a UTF-8 byte-order mark (if the
+    // template's document.xml has one, as the Arrendeavtal template does)
+    // into a literal U+FEFF character ahead of "<?xml ...?>" - browsers'
+    // DOMParser rejects that as a second XML declaration rather than
+    // treating it as an encoding marker, so strip it before parsing.
+    if (xmlText.charCodeAt(0) === 0xFEFF) xmlText = xmlText.slice(1);
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(xmlText, "application/xml");
     var parseErrorEl = xmlDoc.getElementsByTagName("parsererror")[0];

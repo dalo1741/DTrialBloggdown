@@ -183,3 +183,14 @@ to be extended too.
   and had never been caught because the web path's output was never
   round-tripped through a strict parser before. `serializeXml()` now
   strips any existing declaration before adding its own.
+- Fixed after a real user report: the Arrendeavtal template's
+  `word/document.xml` (unlike the other two) ships with a UTF-8
+  byte-order mark. JSZip's `.async("string")` decodes that into a
+  literal U+FEFF character ahead of `<?xml ...?>` in the resulting JS
+  string, which Chromium's `DOMParser` then rejects as a second XML
+  declaration ("Kunde inte tolka mallens XML... XML declaration allowed
+  only at the start of the document") - this only ever broke this one
+  template, since it's the only one of the three with a BOM in its
+  source file. `parseTemplateXml()` now strips a leading U+FEFF before
+  parsing, so any future template with (or without) a BOM is handled
+  the same way.
