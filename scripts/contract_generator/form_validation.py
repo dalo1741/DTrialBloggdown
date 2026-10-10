@@ -37,6 +37,10 @@ def validate_value(kind: str, label: str, value: str) -> str | None:
         if not _DATE_RE.match(value):
             return f"{label}: bör vara i formatet ÅÅÅÅ-MM-DD ({value!r})"
         return None
+    if kind == "select":
+        # A dropdown of fixed choices always has a value (it defaults to
+        # the first option) - nothing to flag.
+        return None
     raise ValueError(f"Unknown kind {kind!r}")
 
 

@@ -39,11 +39,13 @@ see "No LibreOffice?" below.
 
 ## Easiest way: the fill-in-the-boxes form
 
-No YAML editing required - `contract_form.py` opens a window with one
-labeled box per field, grouped and ordered to match the contract's own
-sections, with radio buttons for the either/or choices (public/private
-chargers, billing cadence) and a checkbox for the SIM-card add-on. It uses
-only Python's built-in `tkinter`, so nothing beyond `pip install -r
+No YAML editing required - `contract_form.py` opens a window with a
+template picker first ("Välj avtalstyp" - three contract types as of this
+writing, see `templates.py`), then one labeled box per field, grouped and
+ordered to match the contract's own sections, with radio buttons for the
+either/or choices, checkboxes, and dropdowns where a template restricts a
+value to a fixed set. It uses only Python's built-in `tkinter` plus the
+same `lxml`/`PyYAML` as the CLI, so nothing beyond `pip install -r
 requirements.txt` is needed:
 
 ```bash
@@ -59,7 +61,15 @@ whether to also export a PDF (skip this if LibreOffice isn't installed -
 see "No LibreOffice?" below, opening the `.docx` in Word works the same
 way). A field left empty keeps the template's placeholder (`XXX`, `XX`,
 `DATUM`) rather than being left blank, so it stays visible as a reminder to
-fill it in later.
+fill it in later. "Fyll i exempel" fills the open form with made-up sample
+data, to see roughly how the contract will look before using real data.
+
+**Spara utkast / Mina avtal** saves the form's current state as a draft you
+can reopen later - local JSON files under `~/Aimo-avtal/utkast` (one per
+draft), not shared with colleagues (unlike the web version's save/resume,
+which is - see `web/README.md`). A draft's status flips from "Utkast" to
+"Klar" automatically the first time you successfully generate a `.docx`
+from it.
 
 ## Scripted way: edit data.yaml and run generate_contract.py
 
@@ -72,6 +82,11 @@ cp data.example.yaml data.yaml
 
 python3 generate_contract.py --data data.yaml --out contract.pdf
 ```
+
+Defaults to the original Aimo Charge template; pass `--template-id` to pick
+a different one (`python3 generate_contract.py --list-templates` prints the
+available ids and names - same three as the desktop GUI's picker and the
+web version).
 
 Any field left out of `data.yaml` keeps the template's placeholder (`XXX`,
 `XX`, `DATUM`, or unchecked) - the script prints which ones after running,
@@ -110,8 +125,13 @@ script raises an error if more than one in a group is set to `true`.
 
 ## Extending to a different template
 
-`fields.py`'s `sdt_index` values are specific to this template's content
+`fields.py`'s `index` values are specific to this template's content
 controls. To adapt this to a different contract template, unzip it and walk
 its `<w:sdt>` elements in `word/document.xml` in document order to rebuild
 the field list (each one's surrounding paragraph/table-cell text tells you
-what it's for).
+what it's for) - see `fields_hardware.py` for a worked example, and
+`fields_arrende.py` plus its module docstring if the template turns out to
+use Word's legacy Form Field mechanism instead of content controls (no
+`<w:sdt>` elements at all - `templates.py`'s `mechanism="formtext"`).
+Register the new template in `templates.py` once its `fields_X.py`/
+`form_fields_X.py` exist.

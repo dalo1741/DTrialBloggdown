@@ -35,17 +35,36 @@ Key auth/behavior details are documented inline in `config.example.yaml` (key vs
 
 Fills in the Aimo "Avtal Laddningstjänster" Word template and exports a PDF/.docx, reproducing the original template's header banner, footer, fonts and table styling exactly - because it edits the real template's `word/document.xml` in place (via its native Word content controls) rather than recreating the document from scratch.
 
-**Three interfaces share the same underlying field model**, so a template change must be applied to all three:
-- `generate_contract.py` - CLI, takes a YAML data file (`data.example.yaml` is the schema reference)
-- `contract_form.py` - Tkinter desktop GUI (stdlib only, no extra dependency beyond the base `requirements.txt`)
-- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64). No Python/LibreOffice needed. The same file runs two ways - see "Running outside Claude" below for how it detects which one it's in. **Multi-template since Phase 3** (see Roadmap below) - the CLI/desktop GUI are still single-template (the original Aimo Charge contract only); the web version's `FIELDS_CHARGE`/`SECTIONS_CHARGE` arrays are the hand-ported copy of `fields.py`/`form_fields.py` - **keep them in sync manually**, there's no shared build step between Python and this HTML file. The other templates (`FIELDS_HARDWARE`/`FIELDS_ARRENDE`, etc.) exist only in the web version, with no Python equivalent.
+**Three interfaces, each with their own copy of the field model** (ported
+by hand between them - see "Keeping Python and the web version in sync"
+below), **all multi-template since Phase 3** (see Roadmap below) - same
+three contract types (Aimo Charge, Hårdvara/Installation, Arrendeavtal)
+everywhere:
+- `generate_contract.py` - CLI, takes a YAML data file (`data.example.yaml` is the schema reference for the Aimo Charge template) and `--template-id` to pick which contract type (`--list-templates` prints the available ones)
+- `contract_form.py` - Tkinter desktop GUI (stdlib `tkinter` plus the same `lxml`/`PyYAML` as the CLI - no extra dependency beyond the base `requirements.txt`), opens to a template picker, same three types
+- `web/aimo_contract_form.html` - a single self-contained HTML file; runs entirely client-side (JSZip from a CDN decodes/edits/re-zips the template, which is embedded in the page as base64). No Python/LibreOffice needed. The same file runs two ways - see "Running outside Claude" below for how it detects which one it's in.
 
 ### The field model
 
-- `fields.py` - the ground truth: 49 `Field` entries, each naming a `sdt_index` (the content control's position, in document order, among all `<w:sdt>` elements in `word/document.xml`) plus its `kind` (`"text"` or `"checkbox"`), default placeholder value, and `group` for mutually-exclusive checkbox sets (e.g. `betalning_manadsvis`/`kvartalsvis`/`arsvis`). A field left out of the input data keeps the template's own placeholder (`XXX`, `XX`, `DATUM`, or unchecked) rather than being blanked - this is intentional, so an unfilled field stays visibly a placeholder in the output.
-- `form_fields.py` - UI-only layer on top of `fields.py`: labels, hints, section grouping, and widget kind (`text`/`email`/`numeric`/`date`/`radio`/`checkbox`) for the desktop GUI and (hand-ported) the web form.
-- `form_validation.py` - pure, display-agnostic validation functions (email/date/numeric/required-field regex checks), used by `contract_form.py`. These are advisory warnings the user can override, not hard blocks.
+- **Python side** (CLI + desktop GUI) - `templates.py` is the registry (`TemplateMeta`: id, name, mechanism, fields, sections, docx path, output filename, name-hint field), mirroring the web version's `TEMPLATES` object. Each template has a `fields_X.py` (ground truth - see below) and a `form_fields_X.py` (UI layer on top):
+  - `fields.py` - the Aimo Charge template's field map, and also where the shared `Field` dataclass is defined (imported by `fields_hardware.py`/`fields_arrende.py`): `index` (the content control's or, for the `formtext` mechanism, the legacy Form Field's position, in document order), `kind` (`"text"`/`"checkbox"`/`"dropdown"`), default placeholder value, `group` for mutually-exclusive checkbox sets, `opts` (dropdown only - the field's fixed choices) and `blank_positions` (formtext only - see `fields_arrende.py`'s docstring). A field left out of the input data keeps the template's own placeholder (`XXX`, `XX`, `DATUM`, or unchecked) rather than being blanked - this is intentional, so an unfilled field stays visibly a placeholder in the output.
+  - `fields_hardware.py`/`fields_arrende.py` - the other two templates' field maps, ported 1:1 from the web version's `FIELDS_HARDWARE`/`FIELDS_ARRENDE`. `fields_arrende.py`'s docstring explains the `formtext` mechanism (legacy Word Form Fields, not content controls) and the BOM its source `.docx` ships with.
+  - `form_fields.py` - UI-only layer: `FormField`/`Section`/`Kind` (shared by all three `form_fields_X.py` modules), labels, hints, section grouping, and widget kind (`text`/`email`/`numeric`/`date`/`radio`/`checkbox`/`select`) for the desktop GUI. `form_fields_hardware.py`/`form_fields_arrende.py` are the other two templates' layouts.
+  - `form_validation.py` - pure, display-agnostic validation functions (email/date/numeric/required-field regex checks), used by `contract_form.py`. These are advisory warnings the user can override, not hard blocks.
+  - `generate_contract.py` - `fill_template()` dispatches between `_fill_body_sdt()` (content controls, by `index`) and `_fill_body_formtext()` (legacy Form Fields, by `index` - walks `<w:fldChar>` begin/separate/end triples the same way `fillFormText()` does in the web version), both ported from the matching web-version function.
+- **Web side** - `web/aimo_contract_form.html`'s `TEMPLATES` object, `FIELDS_CHARGE`/`SECTIONS_CHARGE` etc., `fillSdt`/`fillFormText` - see the Phase 3 roadmap notes below.
 - A handful of pricing-table fields sit immediately before a unit the template already prints as static text (` kr/mån`, ` %`, ...) - values for those must be bare numbers, not pre-formatted strings, or the unit doubles up. This is called out in `fields.py`'s module docstring.
+
+### Keeping Python and the web version in sync
+
+There's no shared build step between the two - a template change (or a new
+template) has to be hand-ported to both sides: `fields.py`/`fields_X.py` +
+`form_fields.py`/`form_fields_X.py` + `templates.py` on the Python side,
+`FIELDS_*`/`SECTIONS_*` + the `TEMPLATES` object on the web side. The two
+sides' field IDs and values are meant to match exactly (same `field_id` /
+`id`, same default placeholders, same dropdown `opts`) so a saved draft's
+`data` and a `--data` YAML file are interchangeable in shape, even though
+neither saved drafts nor `data.example.yaml` cross between the two today.
 
 ### PDF export
 
@@ -82,19 +101,31 @@ repointed there if the page is meant to stay live long-term.
 
 ### Extending to a different template
 
-`fields.py`'s `sdt_index` values are specific to `template/Avtal_Aimo_Charge_Fee_to_Landlord_v1.2.docx`'s content controls. To adapt the **Python/CLI/desktop** side to a different contract, unzip it and walk its `<w:sdt>` elements in `word/document.xml` in document order to rebuild the field list - each one's surrounding paragraph/table-cell text identifies what it's for.
-
-For the **web version**, see the Phase 3 roadmap notes below - it also has to handle templates built on Word's legacy Form Field mechanism, not just content controls.
+See the Phase 3 roadmap notes below for both mechanisms (`sdt` - native
+content controls, `fields.py`'s and `fields_hardware.py`'s `index` values
+- and `formtext` - legacy Word Form Fields, `fields_arrende.py`) and how a
+new template gets registered on both the Python and web sides. Short
+version: unzip the template and walk `word/document.xml` in document order
+(`<w:sdt>` elements for `sdt`, `<w:fldChar>` begin/separate/end triples for
+`formtext`) to rebuild the field list - each one's surrounding
+paragraph/table-cell text identifies what it's for.
 
 ## Roadmap
 
 Tracked here so it stays visible across sessions - update status as work completes.
 
-1. **Save and resume contracts** - done (web version only, per scope decision below)
+1. **Save and resume contracts** - done on the web (shared via the Artifact
+   `db`) and, since the desktop extension below, on `contract_form.py` too
+   (local-only, not shared - see its Phase 3 desktop notes)
 2. **Branding and layout** - not started
-3. **Contract templates** - in progress: architecture done, 2 of ~10-15 planned
-   contract types added (web version only, per scope decision below) - more
-   to come as templates are supplied
+3. **Contract templates** - in progress: architecture done on both the web
+   and Python/desktop sides, 2 of ~10-15 planned contract types added
+   everywhere - more to come as templates are supplied
+4. **Desktop app** (`contract_form.py`) - done: template picker, all three
+   contract types, local save/resume - see its Phase 3 notes below for why
+   it diverges from the web version (corporate firewall/download policy
+   ruled out a packaged desktop app wrapping the web version - see
+   "Running outside Claude" above for the parallel web-hosting decision)
 
 ### Phase 1 notes (save and resume)
 
@@ -201,4 +232,58 @@ to be extended too.
   template, since it's the only one of the three with a BOM in its
   source file. `parseTemplateXml()` now strips a leading U+FEFF before
   parsing, so any future template with (or without) a BOM is handled
-  the same way.
+  the same way. The Python side doesn't need the equivalent fix -
+  `lxml`/`libxml2` detect encoding (BOM included) from raw bytes at
+  parse time, unlike the browser path where JSZip hands `DOMParser` an
+  already-decoded JS string that's lost that byte-level signal.
+
+### Phase 3 desktop notes (contract templates + save/resume, on `contract_form.py`)
+
+Added after "this is very good, could it also run as a desktop app?" -
+weighed against wrapping the web version in a packaged app (Electron/
+Tauri/pywebview): rejected because that's a new `.exe`/installer to get
+past the same corporate download/firewall policy that already blocked
+LibreOffice for this user, whereas `python3 contract_form.py` is something
+they already run today with nothing new to install. See `README.md`'s
+"Easiest way" section for the user-facing version of this.
+
+- Brings `contract_form.py`/`generate_contract.py` up to the same
+  multi-template architecture as the web version (`templates.py`'s
+  `TemplateMeta`/`TEMPLATES` mirrors the web's `TemplateMeta`/`TEMPLATES`
+  object field-for-field) **and** adds local save/resume to the desktop
+  GUI, which the original Phase 1 scoping explicitly left out ("not the
+  CLI or desktop GUI") - both landed in the same pass since the template
+  picker and the draft list share most of their UI machinery.
+- **Save/resume is local-only, not shared** - a deliberate scope choice
+  (unlike Phase 1's web version, which defaulted to shared via the
+  Artifact `db`): drafts are JSON files under `DRAFTS_DIR`
+  (`~/Aimo-avtal/utkast`), one file per draft, same `{name, templateId,
+  status, data, createdAt, updatedAt}` shape as the web version's saved
+  contracts. A colleague's drafts are invisible unless `DRAFTS_DIR` is
+  manually pointed at a shared network location - there's no code path
+  for that today, just the fact that the storage is "a folder of JSON
+  files" rather than anything desktop-specific, so pointing `DRAFTS_DIR`
+  at a mapped drive would work if asked for.
+- **The two mechanisms port close to 1:1 from JS to Python**:
+  `_fill_body_sdt()`/`_fill_body_formtext()` in `generate_contract.py`
+  mirror `fillSdt()`/`fillFormText()` in the web version function for
+  function (same begin/separate/end `w:fldChar` walk, same
+  `blank_positions` handling, same dropdown-by-index approach). The
+  `Field` dataclass's `sdt_index` was renamed to `index` to serve both
+  mechanisms (matching the web version's `sdtIndex` vs `index` split) -
+  if anything outside this directory imported `fields.Field` or read
+  `.sdt_index` directly, it needs updating too.
+- **`contract_form.py`'s Tkinter screens use the stacked-frame
+  (`grid` + `tkraise()`) pattern**, not `pack_forget`/`pack`: picker,
+  "Mina avtal" list (a `ttk.Treeview`), and the scrollable form are three
+  sibling frames in the same grid cell, switched by raising one to the
+  front. The form's sections are rebuilt from scratch
+  (`_build_sections()`) on every template switch, same idea as the web
+  version's `buildForm()`.
+- Tkinter isn't available in every Python install in this environment
+  (this session's default `python3` lacks the `_tkinter` binding; testing
+  the GUI used `python3.12` under `xvfb-run`, driving `ContractForm`
+  programmatically - its own methods, not simulated clicks, the same way
+  the web version was tested with Playwright) - this is a sandbox quirk,
+  not expected on a normal desktop Python install, but worth knowing if
+  `import tkinter` fails while working on this file.

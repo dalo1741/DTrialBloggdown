@@ -1,10 +1,16 @@
 """Field map for template/Avtal_Aimo_Charge_Fee_to_Landlord_v1.2.docx.
 
 Each entry describes one content-control placeholder in the template, in
-document order. `sdt_index` is that control's position among all <w:sdt>
+document order. `index` is that control's position among all <w:sdt>
 elements in word/document.xml (0-based) - this is how generate_contract.py
 locates it. `group` links radio-button-style checkboxes so selecting one
 clears the others.
+
+`Field` is shared by every template's field-map module (fields.py,
+fields_hardware.py, fields_arrende.py) - see fields_arrende.py's module
+docstring for what `kind="dropdown"`/`opts`/`blank_positions` are for
+(they only apply to templates using the legacy Form Field mechanism, not
+this one).
 
 Several pricing-table fields (charge_pris_per_uttag, charge_summa_manad,
 startavgift_pris_per_uttag, startavgift_summa, summa_per_manad_total,
@@ -20,11 +26,13 @@ from typing import Literal
 
 @dataclass(frozen=True)
 class Field:
-    sdt_index: int
+    index: int
     field_id: str
-    kind: Literal["text", "checkbox"]
+    kind: Literal["text", "checkbox", "dropdown"]
     default: object
     group: str | None = None
+    opts: tuple[str, ...] | None = None          # dropdown only
+    blank_positions: tuple[int, ...] = ()         # formtext mechanism only
 
 
 FIELDS: list[Field] = [

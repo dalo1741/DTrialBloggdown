@@ -1,42 +1,14 @@
-"""UI layout and validation rules for contract_form.py.
+"""UI layout for the Hårdvara och Installation template - see form_fields.py
+for FormField/Section/Kind. Shares its first 7 sections verbatim with
+form_fields.py's SECTIONS (same fields, same template up to index 39); only
+the pricing/subsidy sections after that are specific to this template.
 
-Separate from fields.py (which maps field_id -> template content-control
-position): this module only describes how each field should be presented
-and checked in the form, grouped into the tabs the form shows.
-
-`FormField`/`Section`/`Kind` here are shared by every template's UI-layout
-module (form_fields.py, form_fields_hardware.py, form_fields_arrende.py).
-"select" (a fixed-choice dropdown, always has a value, never flagged by
-validate_value) only shows up in form_fields_arrende.py, for fields whose
-underlying FORMDROPDOWN template field restricts the value to a small set.
+Ported 1:1 from SECTIONS_HARDWARE in web/aimo_contract_form.html.
 """
 
-from dataclasses import dataclass, field
-from typing import Literal
+from form_fields import FormField, Section
 
-Kind = Literal["text", "email", "numeric", "date", "radio", "checkbox", "select"]
-
-
-@dataclass(frozen=True)
-class FormField:
-    field_id: str  # for radio: the field_id of the *selected* option is what's set True
-    label: str
-    kind: Kind
-    hint: str = ""
-    width: int = 40
-    # radio only: list of (field_id, option_label)
-    options: tuple[tuple[str, str], ...] = ()
-    # select only: the fixed list of choices (the value itself is the label)
-    select_options: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
-class Section:
-    title: str
-    fields: list[FormField] = field(default_factory=list)
-
-
-SECTIONS: list[Section] = [
+SECTIONS_HARDWARE: list[Section] = [
     Section("Motpart", [
         FormField("party2_namn", "Uppdragsgivarens namn", "text"),
         FormField("party2_orgnr", "Uppdragsgivarens org.nr", "text", hint="format: 556000-0000"),
@@ -93,11 +65,29 @@ SECTIONS: list[Section] = [
         FormField("laddare_publika", "Är laddarna publika?", "radio",
                   options=(("laddare_publika_ja", "Ja"), ("laddare_publika_nej", "Nej"))),
     ]),
+    Section("Hårdvara och installation - kostnad", [
+        FormField("hardvara_kostnad", "Kostnad för hårdvara (SEK)", "numeric"),
+        FormField("installation_kostnad", "Kostnad för ev. installation (SEK)", "numeric"),
+        FormField("tillbehor_kostnad", "Kostnad för ev. tillbehör (SEK)", "numeric"),
+        FormField("totalkostnad", "Totalkostnad (SEK)", "numeric"),
+        FormField("antal_laddboxar", "Antal laddboxar (st)", "numeric"),
+        FormField("antal_ladduttag", "Antal ladduttag (st)", "numeric"),
+    ]),
     Section("Tilläggstjänster (SIM-kort)", [
         FormField("sim_pris_per_manad", "Pris per SIM-kort och månad (kr, bara siffror)", "numeric"),
         FormField("sim_ska_levereras", "Aimo ska leverera SIM-kort", "checkbox"),
         FormField("sim_antal", "Antal SIM-kort", "numeric"),
         FormField("sim_summa_manad", "Summa per månad (kr, bara siffror)", "numeric"),
+    ]),
+    Section("Bidragsansökningar", [
+        FormField("bidrag_ladda_bilen", "Aimo ska ansöka om bidraget “Ladda bilen” (icke-publik laddning)", "checkbox"),
+        FormField("bidrag_ladda_bilen_kostnad", "Kostnad (kr)", "numeric"),
+        FormField("bidrag_klimatklivet", "Aimo ska ansöka om bidraget “Klimatklivet” (publik laddning)", "checkbox"),
+        FormField("bidrag_klimatklivet_kostnad", "Kostnad (kr)", "numeric"),
+        FormField("bidrag_slutrapportering", "Aimo ska genomföra slutrapportering för ansökan till relevant myndighet", "checkbox"),
+        FormField("bidrag_slutrapportering_kostnad", "Kostnad (kr)", "numeric"),
+        FormField("arlig_kontroll", "Årlig kontroll av laddboxarna (faktureras årligen i förskott)", "checkbox"),
+        FormField("arlig_kontroll_kostnad", "Kostnad (kr/år)", "numeric"),
     ]),
     Section("Avtalstid", [
         FormField("avtal_start_datum", "Startdatum", "date", hint="format: ÅÅÅÅ-MM-DD"),
